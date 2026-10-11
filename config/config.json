@@ -10,7 +10,7 @@
     "review_gate_enabled": true,
     "schedule_cron": "0 14 * * *",
     "timezone": "Asia/Dhaka",
-    "website_url": "https://aris-anime.com",
+    "website_url": "https://anime.ariswork.site",
     "brand_name": "ARIS ANIME",
     "channel_name": "iταchι Live",
     "default_hashtags": [

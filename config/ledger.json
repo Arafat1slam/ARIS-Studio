@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-11T21:47:22.046606Z",
+  "last_updated": "2026-10-11T22:38:26.007006Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -9,6 +9,17 @@
       "youtube_id": "K21FSgi3Jcs",
       "status": "published",
       "timestamp": "2026-10-11T21:47:22.046606Z"
+    },
+    {
+      "content_hash": "b9c48fde2f66775e1f052dac43d4100e5a156e7a65ae444ae6b66c827df1816c",
+      "video_file": "short_20261012_043744_476fe2f8529c.mp4",
+      "title": "Can you guess this iconic anime sound? \ud83c\udfb6\u2728 #Shorts",
+      "published_at": "2026-10-11T22:38:26.007006Z",
+      "youtube_id": "NBp1_-BvAVs",
+      "facebook_id": "sim_fb_1791736706",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-11T22:38:26.007006Z"
     }
   ]
 }

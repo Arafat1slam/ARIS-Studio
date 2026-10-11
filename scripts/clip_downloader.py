@@ -50,9 +50,11 @@ def download_clip(url_or_query, max_duration=60):
     # Output template: data/approved_clips/%(id)s.%(ext)s
     out_tmpl = os.path.join(OUTPUT_DIR, "%(title).50s_%(id)s.%(ext)s")
 
+    ffmpeg_bin = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
     cmd = [
         sys.executable, "-m", "yt_dlp",
-        "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "--ffmpeg-location", ffmpeg_bin,
+        "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
         "--merge-output-format", "mp4",
         "--max-filesize", "100M",
         "--match-filter", f"duration <= {max_duration} & !is_live",

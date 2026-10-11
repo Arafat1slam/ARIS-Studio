@@ -76,14 +76,17 @@ def generate_short(input_path, output_dir=None, max_duration=58, title_override=
     out_filename = f"short_{timestamp}_{raw_hash}.mp4"
     out_path = os.path.join(output_dir, out_filename)
 
-    # Filter graph:
-    # 1. Background: scale to 1080x1920 (crop/fill) and apply heavy blur (boxblur=20:5)
-    # 2. Foreground: scale to width 1080 maintaining aspect ratio
-    # 3. Overlay foreground centered on blurred background
+    # Anti-Copyright & High-Quality Remastering Filter Graph:
+    # 1. Background: Crop & scale to 1080x1920 with high-def Gaussian/box blur
+    # 2. Foreground: 4% edge crop (breaks broadcast frame fingerprints) + 1080px scale
+    # 3. HDR Color Pop: eq=contrast=1.06:brightness=0.01:saturation=1.14 (shifts color histogram)
+    # 4. 4K-Style Sharpness: unsharp filter to make anime lines razor-sharp
+    # 5. Micro-Speed Shift: setpts=PTS/1.04 (breaks video keyframe timestamps)
+    # 6. Audio Waveform Shift: atempo=1.04 (breaks Content ID acoustic fingerprint while sounding 100% natural)
     filter_complex = (
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5[bg];"
-        "[0:v]scale=1080:-2[fg];"
-        "[bg][fg]overlay=(W-w)/2:(H-h)/2[v]"
+        "[0:v]crop=in_w*0.96:in_h*0.96,scale=1080:-2,eq=contrast=1.06:brightness=0.01:saturation=1.14,unsharp=5:5:0.8:5:5:0.0[fg];"
+        "[bg][fg]overlay=(W-w)/2:(H-h)/2,setpts=PTS/1.04[v]"
     )
 
     cmd = [
@@ -95,11 +98,13 @@ def generate_short(input_path, output_dir=None, max_duration=58, title_override=
         "-filter_complex", filter_complex,
         "-map", "[v]",
         "-map", "0:a?",
+        "-af", "atempo=1.04,volume=1.05",
         "-c:v", "libx264",
         "-preset", "fast",
-        "-crf", "23",
+        "-crf", "18",  # Visually lossless quality (master grade)
+        "-pix_fmt", "yuv420p",
         "-c:a", "aac",
-        "-b:a", "192k",
+        "-b:a", "256k",
         "-movflags", "+faststart",
         out_path
     ]

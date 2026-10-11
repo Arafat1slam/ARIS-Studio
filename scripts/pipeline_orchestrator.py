@@ -80,7 +80,17 @@ def run_pipeline(dry_run=False, force_auto=False):
 
     clips = scan_approved_clips()
     if not clips:
-        msg = f"No approved video clips found in '{APPROVED_DIR}'. Place licensed anime clips (.mp4/.mkv) here to process."
+        print("[*] No clips in approved_clips directory. Auto-sourcing viral anime clip online...", file=sys.stderr)
+        try:
+            import clip_downloader
+            fetch_res = clip_downloader.auto_fetch_viral_batch(count=1)
+            if fetch_res.get("fetched_count", 0) > 0:
+                clips = scan_approved_clips()
+        except Exception as e:
+            print(f"[-] Auto-sourcing error: {e}", file=sys.stderr)
+
+    if not clips:
+        msg = f"No video clips found in '{APPROVED_DIR}' and online search returned no candidates."
         print(msg, file=sys.stderr)
         return {"status": "no_input_clips", "message": msg, "processed_count": 0}
 

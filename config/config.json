@@ -1,7 +1,7 @@
 {
   "system": {
     "name": "ARIS Content Automation System",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "target_os": "Windows",
     "deployment": "local-first"
   },
@@ -12,12 +12,27 @@
     "timezone": "Asia/Dhaka",
     "website_url": "https://aris-anime.com",
     "brand_name": "ARIS ANIME",
+    "channel_name": "iταchι Live",
     "default_hashtags": [
       "#anime",
       "#animereels",
       "#animeshorts",
       "#arisanime",
+      "#itachilive",
       "#otaku"
+    ]
+  },
+  "auto_sourcing": {
+    "enabled": true,
+    "max_duration_seconds": 60,
+    "search_queries": [
+      "anime epic fight scene 4k",
+      "jujutsu kaisen gojo epic moment 4k",
+      "demon slayer tanjiro hinokami kagura 4k",
+      "solo leveling sung jinwoo shadow monarch",
+      "one piece luffy gear 5 viral edit",
+      "bleach ichigo bankai 4k edit",
+      "attack on titan levi vs beast titan 4k"
     ]
   },
   "video_processing": {
@@ -27,10 +42,18 @@
     "target_height": 1920,
     "video_codec": "libx264",
     "audio_codec": "aac",
-    "crf": 23,
+    "crf": 18,
     "preset": "fast",
-    "burn_watermark": true,
-    "watermark_text": "ARIS ANIME"
+    "anti_copyright": {
+      "enabled": true,
+      "edge_crop_ratio": 0.96,
+      "contrast": 1.06,
+      "saturation": 1.14,
+      "unsharp": true,
+      "speed_multiplier": 1.04,
+      "audio_tempo": 1.04,
+      "gaussian_blur_background": true
+    }
   },
   "gemini": {
     "model": "gemini-2.5-flash",
@@ -47,7 +70,7 @@
       "made_for_kids": false
     },
     "facebook": {
-      "enabled": true,
+      "enabled": false,
       "page_post_as_reel": true
     }
   },

@@ -1,0 +1,164 @@
+{
+  "name": "ARIS Content Automation Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-node",
+      "name": "Schedule Trigger (Daily 2:00 PM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python \"scripts/pipeline_orchestrator.py\""
+      },
+      "id": "execute-orchestrator-node",
+      "name": "Execute Pipeline Orchestrator",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawOutput = $input.item.json.stdout || '{}';\ntry {\n  const result = JSON.parse(rawOutput);\n  return [{ json: result }];\n} catch (e) {\n  return [{ json: { error: 'Failed to parse JSON', raw: rawOutput } }];\n}"
+      },
+      "id": "parse-pipeline-json-node",
+      "name": "Parse Orchestrator Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-has-clips",
+              "leftValue": "={{ $json.processed_clips }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-processed-clips-node",
+      "name": "Clips Processed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.item.json;\nconst timestamp = new Date().toISOString();\nconsole.log(`[ARIS Content Automation] Run at ${timestamp}: Processed ${res.processed_clips} clips.`);\nreturn [{ json: { status: 'success', summary: res } }];"
+      },
+      "id": "log-success-node",
+      "name": "Log Execution Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log('[ARIS Content Automation] Idle run: No new approved clips found in data/approved_clips.');\nreturn [{ json: { status: 'idle', reason: 'No new clips found.' } }];"
+      },
+      "id": "log-idle-node",
+      "name": "Log Idle State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (Daily 2:00 PM)": {
+      "main": [
+        [
+          {
+            "node": "Execute Pipeline Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Pipeline Orchestrator": {
+      "main": [
+        [
+          {
+            "node": "Parse Orchestrator Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Orchestrator Output": {
+      "main": [
+        [
+          {
+            "node": "Clips Processed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clips Processed?": {
+      "main": [
+        [
+          {
+            "node": "Log Execution Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Idle State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

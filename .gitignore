@@ -1,0 +1,46 @@
+# Secrets & Environment variables
+.env
+*.env.local
+*.pem
+*.key
+credentials.json
+client_secrets*.json
+
+# n8n local data & SQLite databases
+.n8n/
+*.sqlite
+*.sqlite3
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Data and Generated Video files (large binaries)
+data/processed_shorts/*
+!data/processed_shorts/.gitkeep
+data/approved_clips/*
+!data/approved_clips/.gitkeep
+data/logs/*.log
+!data/logs/.gitkeep
+
+# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Tools and executables
+tools/*.exe
+!tools/.gitkeep
+

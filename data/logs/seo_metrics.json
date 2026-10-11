@@ -1,0 +1,29 @@
+{
+  "status": "pending_credentials",
+  "message": "GSC credentials not yet set in .env. Returning baseline sample structure.",
+  "site_url": "sc-domain:aris-anime.com",
+  "pulled_at": "2026-10-11T20:22:08.687486Z",
+  "top_queries": [
+    {
+      "query": "watch anime online free hd",
+      "clicks": 140,
+      "impressions": 1820,
+      "ctr": 0.0769,
+      "position": 4.2
+    },
+    {
+      "query": "aris anime streaming",
+      "clicks": 95,
+      "impressions": 410,
+      "ctr": 0.2317,
+      "position": 1.1
+    },
+    {
+      "query": "jujutsu kaisen best fights",
+      "clicks": 80,
+      "impressions": 1200,
+      "ctr": 0.0667,
+      "position": 6.8
+    }
+  ]
+}

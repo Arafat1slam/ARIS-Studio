@@ -1,0 +1,102 @@
+{
+  "name": "ARIS SEO Signal Tracker (Google Search Console)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "schedule-gsc-trigger",
+      "name": "Weekly Trigger (Mondays 10:00 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python \"scripts/gsc_metrics.py\""
+      },
+      "id": "execute-gsc-node",
+      "name": "Pull GSC Metrics",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '{}';\ntry {\n  const data = JSON.parse(stdout);\n  return [{ json: data }];\n} catch (e) {\n  return [{ json: { error: 'Failed to parse GSC output' } }];\n}"
+      },
+      "id": "parse-gsc-node",
+      "name": "Parse GSC Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = $input.item.json;\nconsole.log(`[SEO Signal Pull] Completed for site: ${metrics.site_url || 'N/A'}`);\nreturn [{ json: { status: 'logged', queryCount: metrics.top_queries ? metrics.top_queries.length : 0 } }];"
+      },
+      "id": "log-gsc-node",
+      "name": "Log SEO Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Weekly Trigger (Mondays 10:00 AM)": {
+      "main": [
+        [
+          {
+            "node": "Pull GSC Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull GSC Metrics": {
+      "main": [
+        [
+          {
+            "node": "Parse GSC Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse GSC Output": {
+      "main": [
+        [
+          {
+            "node": "Log SEO Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

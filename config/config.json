@@ -1,0 +1,59 @@
+{
+  "system": {
+    "name": "ARIS Content Automation System",
+    "version": "1.0.0",
+    "target_os": "Windows",
+    "deployment": "local-first"
+  },
+  "pipeline": {
+    "mode": "review",
+    "review_gate_enabled": true,
+    "schedule_cron": "0 14 * * *",
+    "timezone": "Asia/Dhaka",
+    "website_url": "https://aris-anime.com",
+    "brand_name": "ARIS ANIME",
+    "default_hashtags": [
+      "#anime",
+      "#animereels",
+      "#animeshorts",
+      "#arisanime",
+      "#otaku"
+    ]
+  },
+  "video_processing": {
+    "ffmpeg_path": "tools/ffmpeg.exe",
+    "max_duration_seconds": 58,
+    "target_width": 1080,
+    "target_height": 1920,
+    "video_codec": "libx264",
+    "audio_codec": "aac",
+    "crf": 23,
+    "preset": "fast",
+    "burn_watermark": true,
+    "watermark_text": "ARIS ANIME"
+  },
+  "gemini": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.7,
+    "max_tokens": 1024,
+    "daily_request_limit": 100,
+    "track_quota": true
+  },
+  "publishing": {
+    "youtube": {
+      "enabled": true,
+      "privacy_status": "public",
+      "category_id": "1",
+      "made_for_kids": false
+    },
+    "facebook": {
+      "enabled": true,
+      "page_post_as_reel": true
+    }
+  },
+  "seo_tracking": {
+    "enabled": true,
+    "pull_interval_days": 1,
+    "row_limit": 25
+  }
+}

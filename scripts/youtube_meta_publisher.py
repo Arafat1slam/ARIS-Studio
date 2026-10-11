@@ -10,6 +10,7 @@ import json
 import urllib.request
 import urllib.parse
 from datetime import datetime
+sys.path.append(os.path.dirname(__file__))
 import duplicate_checker
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -32,6 +33,7 @@ def load_env():
 
 def get_youtube_token():
     """Refresh YouTube OAuth2 access token."""
+    load_env()
     client_id = os.environ.get("YOUTUBE_CLIENT_ID")
     client_secret = os.environ.get("YOUTUBE_CLIENT_SECRET")
     refresh_token = os.environ.get("YOUTUBE_REFRESH_TOKEN")

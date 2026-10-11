@@ -106,7 +106,7 @@
     }
   ],
   "connections": {
-    "Schedule Trigger (Daily 2:00 PM)": {
+    "Schedule Trigger (3x Daily: 1:30 PM, 6:30 PM, 9:30 PM)": {
       "main": [
         [
           {

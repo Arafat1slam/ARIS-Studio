@@ -56,7 +56,10 @@ goto MENU
 
 :N8N
 cls
-echo [*] Starting n8n workflow engine...
+echo [*] Opening n8n web interface at http://localhost:5678 ...
+start http://localhost:5678
+set NODES_EXCLUDE=[]
+set N8N_RUNNERS_ENABLED=false
 cmd /c n8n start
 pause
 goto MENU

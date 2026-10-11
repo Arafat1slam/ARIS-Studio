@@ -189,7 +189,30 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     # Step 3: Upload to Facebook
     fb_res = publish_to_facebook(video_path, title, description, dry_run=dry_run)
 
-    # Step 4: Record in ledger
+    # Step 4: Upload to TikTok (if credentials configured)
+    tt_res = {"success": False, "platform": "tiktok", "status": "skipped_not_configured"}
+    has_tiktok = bool(os.environ.get("TIKTOK_ACCESS_TOKEN") or os.environ.get("TIKTOK_REFRESH_TOKEN"))
+    if has_tiktok:
+        if dry_run:
+            print("[DRY-RUN] Simulating TikTok upload...", file=sys.stderr)
+            tt_res = {"success": True, "platform": "tiktok", "status": "simulated", "publish_id": "sim_tt_123"}
+        else:
+            try:
+                import tiktok_publisher
+                caption_tags = " ".join([f"#{t.strip('#')}" for t in (tags or ["anime", "viral", "shorts"])])
+                tt_caption = f"{title}\n\n▶ https://anime.ariswork.site\n\n{caption_tags}"
+                tt_out = tiktok_publisher.publish_video_to_tiktok(video_path, tt_caption)
+                tt_res = {
+                    "success": True,
+                    "platform": "tiktok",
+                    "publish_id": tt_out.get("publish_id"),
+                    "status": tt_out.get("status")
+                }
+            except Exception as e:
+                print(f"[-] TikTok publish error: {e}", file=sys.stderr)
+                tt_res = {"success": False, "platform": "tiktok", "error": str(e)}
+
+    # Step 5: Record in ledger
     record = {
         "content_hash": content_hash,
         "video_file": os.path.basename(video_path),
@@ -197,12 +220,13 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
         "published_at": datetime.utcnow().isoformat() + "Z",
         "youtube_id": yt_res.get("video_id"),
         "facebook_id": fb_res.get("video_id") or fb_res.get("post_id"),
+        "tiktok_id": tt_res.get("publish_id"),
         "status": "published"
     }
     duplicate_checker.add_record(record)
 
-    # Step 5: Auto-delete video file to save disk space
-    if yt_res.get("success") and not dry_run:
+    # Step 6: Auto-delete video file to save disk space
+    if (yt_res.get("success") or tt_res.get("success")) and not dry_run:
         try:
             if os.path.exists(video_path):
                 os.remove(video_path)
@@ -214,6 +238,7 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
         "success": True,
         "youtube": yt_res,
         "facebook": fb_res,
+        "tiktok": tt_res,
         "ledger_record": record
     }
 

@@ -1,38 +1,57 @@
 {
   "system": {
     "name": "ARIS Content Automation System",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "target_os": "Windows",
     "deployment": "local-first"
   },
   "pipeline": {
-    "mode": "review",
-    "review_gate_enabled": true,
-    "schedule_cron": "0 14 * * *",
+    "mode": "auto",
+    "review_gate_enabled": false,
+    "schedule_cron": "30 13,18,21 * * *",
     "timezone": "Asia/Dhaka",
     "website_url": "https://anime.ariswork.site",
     "brand_name": "ARIS ANIME",
     "channel_name": "iταchι Live",
+    "auto_delete_after_publish": true,
     "default_hashtags": [
       "#anime",
       "#animereels",
       "#animeshorts",
       "#arisanime",
       "#itachilive",
-      "#otaku"
+      "#otaku",
+      "#viral"
     ]
+  },
+  "schedule_info": {
+    "daily_posts": 3,
+    "peak_active_times": [
+      "01:30 PM (Midday Lunch Scroll)",
+      "06:30 PM (Evening Peak)",
+      "09:30 PM (Night Prime Time)"
+    ],
+    "cron_expression": "30 13,18,21 * * *"
   },
   "auto_sourcing": {
     "enabled": true,
     "max_duration_seconds": 60,
     "search_queries": [
-      "anime epic fight scene 4k",
       "jujutsu kaisen gojo epic moment 4k",
+      "jujutsu kaisen sukuna domain expansion 4k",
       "demon slayer tanjiro hinokami kagura 4k",
-      "solo leveling sung jinwoo shadow monarch",
+      "demon slayer zenitsu godspeed 4k edit",
+      "solo leveling sung jinwoo arise 4k edit",
+      "solo leveling shadow monarch epic fight",
       "one piece luffy gear 5 viral edit",
+      "one piece zoro king of hell 4k",
       "bleach ichigo bankai 4k edit",
-      "attack on titan levi vs beast titan 4k"
+      "bleach aizen kyoka suigetsu 4k",
+      "attack on titan levi vs beast titan 4k",
+      "chainsaw man denji pochita 4k edit",
+      "dragon ball goku ultra instinct 4k",
+      "naruto shippuden itachi uchiha epic amv 4k",
+      "naruto madara vs shinobi alliance 4k"
     ]
   },
   "video_processing": {

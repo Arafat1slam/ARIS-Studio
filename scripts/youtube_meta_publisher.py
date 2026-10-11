@@ -201,6 +201,15 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     }
     duplicate_checker.add_record(record)
 
+    # Step 5: Auto-delete video file to save disk space
+    if yt_res.get("success") and not dry_run:
+        try:
+            if os.path.exists(video_path):
+                os.remove(video_path)
+                print(f"[+] Auto-deleted local video after publishing: {os.path.basename(video_path)}", file=sys.stderr)
+        except Exception as e:
+            print(f"[-] Auto-delete notice: {e}", file=sys.stderr)
+
     return {
         "success": True,
         "youtube": yt_res,

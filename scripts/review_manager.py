@@ -54,6 +54,11 @@ def review_cli():
             )
             if res.get("success"):
                 print("[+] Successfully published and recorded to duplicate ledger!")
+                try:
+                    if os.path.exists(item.get("source_clip", "")):
+                        os.remove(item["source_clip"])
+                except Exception:
+                    pass
             else:
                 print(f"[-] Publishing failed: {res.get('error')}")
                 remaining.append(item)

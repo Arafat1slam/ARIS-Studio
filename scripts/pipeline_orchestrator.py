@@ -113,7 +113,17 @@ def run_pipeline(dry_run=False, force_auto=False):
         # 2. Duplicate prevention check
         is_dup, dup_record = duplicate_checker.is_duplicate(content_hash)
         if is_dup:
-            print(f"[*] Duplicate detected in ledger! Skipping {filename} (Hash: {content_hash[:8]}).", file=sys.stderr)
+            print(f"[*] Duplicate detected in ledger! Skipping and purging {filename} (Hash: {content_hash[:8]}).", file=sys.stderr)
+            try:
+                if os.path.exists(clip):
+                    os.remove(clip)
+            except Exception:
+                pass
+            try:
+                if os.path.exists(output_file):
+                    os.remove(output_file)
+            except Exception:
+                pass
             results.append({
                 "clip": filename,
                 "status": "duplicate_skipped",
@@ -184,6 +194,40 @@ def run_pipeline(dry_run=False, force_auto=False):
                 "content_hash": content_hash,
                 "details": pub_res
             })
+
+    # If all existing clips were duplicates and none got published, auto-fetch 1 fresh clip online!
+    has_success = any(r.get("status") in ("published", "pending_review") for r in results)
+    if not has_success and not dry_run:
+        print("[*] All previous clips were duplicates. Auto-fetching fresh viral anime clip...", file=sys.stderr)
+        try:
+            import clip_downloader
+            fetch_res = clip_downloader.auto_fetch_viral_batch(count=1)
+            fresh_clips = scan_approved_clips()
+            for fresh_clip in fresh_clips:
+                fname = os.path.basename(fresh_clip)
+                vres = ffmpeg_generator.generate_short(fresh_clip, max_duration=max_duration)
+                if vres.get("success"):
+                    chash = vres["content_hash"]
+                    outfile = vres["output_file"]
+                    isdup, _ = duplicate_checker.is_duplicate(chash)
+                    if not isdup:
+                        cname = os.path.splitext(fname)[0].replace("_", " ").replace("-", " ")
+                        mres = gemini_metadata.generate_metadata(clip_context=cname)
+                        t_title = mres.get("title", f"{cname} #Shorts")
+                        t_desc = mres.get("description", "")
+                        t_tags = mres.get("tags", [])
+                        pres = youtube_meta_publisher.publish_content(outfile, chash, t_title, t_desc, t_tags, dry_run=False)
+                        results.append({
+                            "clip": fname,
+                            "status": "published" if pres.get("success") else "publish_failed",
+                            "content_hash": chash,
+                            "details": pres
+                        })
+                        try:
+                            if os.path.exists(fresh_clip): os.remove(fresh_clip)
+                        except: pass
+        except Exception as e:
+            print(f"[-] Fresh clip auto-source failed: {e}", file=sys.stderr)
 
     summary = {
         "status": "completed",

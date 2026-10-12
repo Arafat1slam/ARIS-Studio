@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T00:15:56.501400Z",
+  "last_updated": "2026-10-12T08:14:02.465358Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -30,6 +30,37 @@
       "youtube_id": "uK1GMCUC0Tk",
       "status": "published",
       "timestamp": "2026-10-12T00:15:56.501400Z"
+    },
+    {
+      "content_hash": "badd58f3319012a691fe056f595fc62e9f297497effae02690a5866874770361",
+      "video_file": "arisvexx_1791765001.mp4",
+      "title": "Control Without Words #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T00:30:30.078481Z",
+      "youtube_id": "XWJziEVFr7A",
+      "status": "published",
+      "timestamp": "2026-10-12T00:30:30.078481Z"
+    },
+    {
+      "content_hash": "dae8f1b7d5f735bde713b05ba629f89f49e034120e68ba44a45500a9395da9d2",
+      "video_file": "short_20261012_140937_268a4a03c8a0.mp4",
+      "title": "Levi VS The ancient 9 Titans \uff5c AOT Final Part \uff5c 4K zAxb4wHcL k \ud83d\udd25 #Shorts",
+      "published_at": "2026-10-12T08:10:30.855086Z",
+      "youtube_id": "yx0MBVfTeAA",
+      "facebook_id": "sim_fb_1791771030",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-12T08:10:30.855086Z"
+    },
+    {
+      "content_hash": "77f9b8f1c71b86773c4693d352fa289e13cecbe046edad4ad58998651d819d76",
+      "video_file": "arisvexx_1791792808.mp4",
+      "title": "Unlock Your Dark Power. #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T08:14:02.465358Z",
+      "youtube_id": "sim_arisvexx_1791771242",
+      "status": "published",
+      "timestamp": "2026-10-12T08:14:02.465358Z"
     }
   ]
 }

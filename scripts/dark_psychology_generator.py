@@ -208,12 +208,10 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     build_ass_subtitles(badge, lines, cues, ass_file)
     print("[*] Formatted dynamic ASS subtitles.")
 
-    # 4. Source B-Roll
-    broll_source = os.path.join(TEMP_DIR, "shelby_full.mp4")
-    if not os.path.exists(broll_source):
-        print("[-] Base b-roll not found, fetching...")
-        cmd = ['yt-dlp', '--ffmpeg-location', FFMPEG_PATH, '-f', 'bestvideo[height<=1080]', '-o', broll_source, 'https://www.youtube.com/watch?v=Yi0qYw3YqC8']
-        subprocess.run(cmd, check=True)
+    # 4. Source Dynamic Unique B-Roll
+    import broll_manager
+    broll_source, broll_offset = broll_manager.get_unique_broll(segment_duration=28)
+    print(f"[*] Applying unique B-Roll scene: {os.path.basename(broll_source)} (Offset: {broll_offset}s)")
 
     # 5. Master Render with FFmpeg
     output_video = os.path.join(OUTPUT_DIR, f"arisvexx_{timestamp}.mp4")
@@ -234,6 +232,7 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     cmd = [
         FFMPEG_PATH,
         "-y",
+        "-ss", str(broll_offset),
         "-stream_loop", "-1",
         "-i", broll_source,
         "-i", voice_file,

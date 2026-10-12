@@ -133,6 +133,7 @@ def generate_script_with_ai():
 
 def generate_gemini_tts(text: str, voice_name: str = "Charon") -> bytes:
     import base64
+    import urllib.error
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("Missing GEMINI_API_KEY for Gemini TTS")
@@ -151,10 +152,18 @@ def generate_gemini_tts(text: str, voice_name: str = "Charon") -> bytes:
         }
     }
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        res = json.loads(r.read().decode("utf-8"))
-        raw_b64 = res["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
-        return base64.b64decode(raw_b64)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            res = json.loads(r.read().decode("utf-8"))
+            candidates = res.get("candidates", [])
+            if not candidates or "content" not in candidates[0]:
+                raise RuntimeError(f"Gemini API returned no content candidates: {res}")
+            raw_b64 = candidates[0]["content"]["parts"][0]["inlineData"]["data"]
+            return base64.b64decode(raw_b64)
+    except urllib.error.HTTPError as he:
+        body = he.read().decode("utf-8", errors="ignore") if he.fp else ""
+        print(f"[-] Gemini TTS HTTP {he.code} Error: {body}", file=sys.stderr, flush=True)
+        raise RuntimeError(f"Gemini TTS HTTP {he.code}: {body}") from he
 
 async def create_voice_and_timing(lines: list, voice_path: str):
     full_text = " ".join([line[0] for line in lines])
@@ -286,11 +295,16 @@ PlayResY: 1920
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: ViralMain,Arial Black,72,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,8,4,2,40,40,760,1
 Style: HookBadge,Arial Black,34,&H0000FFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,6,3,2,40,40,1660,1
+Style: HeaderBrand,Arial Black,36,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,6,3,2,40,40,1720,1
+Style: HeaderSub,Arial Black,22,&H004422FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,5,2,2,40,40,1670,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     dialogues = []
+    # Persistent channel branding headers (100% immune to FFmpeg drawtext font configuration crashes)
+    dialogues.append("Dialogue: 0,0:00:00.00,0:01:00.00,HeaderBrand,,0,0,0,,ARISVEXX")
+    dialogues.append("Dialogue: 0,0:00:00.00,0:01:00.00,HeaderSub,,0,0,0,,THE 48 LAWS OF POWER")
     # Badge for first 3.8s
     dialogues.append(f"Dialogue: 0,0:00:00.05,0:00:03.80,HookBadge,,0,0,0,,{badge}")
 
@@ -373,9 +387,7 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
         "eq=contrast=1.20:brightness=-0.03:saturation=0.90,"
         "vignette=PI/4.5,"
         "unsharp=3:3:0.9,"
-        f"ass='{escaped_ass}',"
-        "drawtext=text='ARISVEXX':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=180:shadowcolor=black:shadowx=3:shadowy=3,"
-        "drawtext=text='THE 48 LAWS OF POWER':fontsize=22:fontcolor=0xff2244:x=(w-text_w)/2:y=230:shadowcolor=black:shadowx=2:shadowy=2[v];"
+        f"ass='{escaped_ass}'[v];"
         "[1:a]volume=1.35,bass=g=3:f=110[voice];"
         "[2:a]volume=0.22,bass=g=5:f=80[bgm];"
         "[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]"
@@ -408,7 +420,11 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     ]
 
     print("[*] Rendering video canvas with strict duration limit...")
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as ffe:
+        print(f"[-] FFmpeg Render Error Output:\n{ffe.stderr}", file=sys.stderr, flush=True)
+        raise RuntimeError(f"FFmpeg render failure: {ffe.stderr[-500:]}") from ffe
     print(f"[+] Video rendered successfully: {os.path.basename(output_video)} ({os.path.getsize(output_video)/(1024*1024):.2f} MB)")
 
     # 6. Compute Hash
@@ -487,14 +503,20 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     }
 
 if __name__ == "__main__":
-    cfg_review = True
     try:
-        with open(os.path.join(PROJECT_DIR, "config", "config.json"), "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-            cfg_review = cfg.get("pipeline", {}).get("review_gate_enabled", True)
-    except Exception:
-        pass
-    force_auto = "--auto" in sys.argv
-    is_dry = "--dry-run" in sys.argv or (cfg_review and not force_auto)
-    res = produce_arisvexx_short(dry_run=is_dry)
-    print(json.dumps(res, indent=2))
+        cfg_review = True
+        try:
+            with open(os.path.join(PROJECT_DIR, "config", "config.json"), "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                cfg_review = cfg.get("pipeline", {}).get("review_gate_enabled", True)
+        except Exception:
+            pass
+        force_auto = "--auto" in sys.argv
+        is_dry = "--dry-run" in sys.argv or (cfg_review and not force_auto)
+        res = produce_arisvexx_short(dry_run=is_dry)
+        print(json.dumps(res, indent=2), flush=True)
+    except Exception as e:
+        import traceback
+        print(f"\n[CRITICAL PIPELINE EXCEPTION]: {e}", file=sys.stderr, flush=True)
+        traceback.print_exc()
+        sys.exit(1)

@@ -62,11 +62,14 @@ jobs:
         env:
           ENV_CONTENT: ${{ secrets.ENV_CONTENT }}
         run: |
-          python -c "import os; c = os.environ.get('ENV_CONTENT', ''); open('.env', 'w', encoding='utf-8').write(c + '\nPIPELINE_MODE=auto\nFFMPEG_PATH=ffmpeg\n') if c else None"
+          python -c "import os; c = os.environ.get('ENV_CONTENT', ''); open('.env', 'w', encoding='utf-8').write(c.strip() + '\nPIPELINE_MODE=auto\nFFMPEG_PATH=ffmpeg\n') if c else print('[!] WARNING: secrets.ENV_CONTENT is empty!')"
+          python -c "import os; print('[+] .env file status: exists=' + str(os.path.exists('.env')) + ', size=' + str(os.path.getsize('.env') if os.path.exists('.env') else 0) + ' bytes')"
 
       - name: Run Cloud Video Engine & Publisher
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
-          python scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
+          python -u scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
 
       - name: Sync Ledger and Logs to Repository
         if: always()

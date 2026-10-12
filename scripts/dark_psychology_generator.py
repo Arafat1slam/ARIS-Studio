@@ -132,11 +132,13 @@ def generate_script_with_ai():
 async def create_voice_and_timing(lines: list, voice_path: str):
     full_text = " ".join([line[0] for line in lines])
     
-    # 1. Try Edge-TTS (up to 3 retries with backoff)
-    for attempt in range(1, 4):
+    # 1. Try Edge-TTS (up to 4 retries across top neural male voices)
+    male_voices = ["en-US-BrianNeural", "en-US-ChristopherNeural", "en-US-GuyNeural"]
+    for attempt in range(1, 5):
+        chosen_voice = male_voices[(attempt - 1) % len(male_voices)]
         try:
-            print(f"[*] Generating neural voiceover via Edge-TTS (Attempt {attempt}/3)...", file=sys.stderr)
-            communicate = edge_tts.Communicate(full_text, voice="en-US-BrianNeural", rate="-2%")
+            print(f"[*] Generating deep male voiceover via Edge-TTS ({chosen_voice}, Attempt {attempt}/4)...", file=sys.stderr)
+            communicate = edge_tts.Communicate(full_text, voice=chosen_voice, rate="-3%", pitch="-1Hz")
             cues = []
             audio_data = bytearray()
             async for chunk in communicate.stream():
@@ -150,19 +152,30 @@ async def create_voice_and_timing(lines: list, voice_path: str):
             if audio_data and cues:
                 with open(voice_path, "wb") as f:
                     f.write(audio_data)
-                print(f"[+] Edge-TTS generated successfully ({len(cues)} cues).", file=sys.stderr)
+                print(f"[+] Edge-TTS deep male voice generated successfully ({len(cues)} cues).", file=sys.stderr)
                 return cues
         except Exception as e:
             print(f"[!] Edge-TTS attempt {attempt} failed: {e}", file=sys.stderr)
             await asyncio.sleep(2 * attempt)
 
-    # 2. Resilient fallback to Google TTS if datacenter IP blocked
-    print("[!] Falling back to Google TTS engine...", file=sys.stderr)
+    # 2. Resilient Deep-Male Pitch-Shifted Fallback (NEVER female!)
+    print("[!] Transforming voice into deep baritone male voice...", file=sys.stderr)
     try:
         from gtts import gTTS
+        raw_tts = os.path.join(TEMP_DIR, f"raw_tts_{int(time.time())}.mp3")
         tts = gTTS(text=full_text, lang='en', tld='us', slow=False)
-        tts.save(voice_path)
+        tts.save(raw_tts)
         
+        # Pitch-shift by -4 semitones and boost sub-bass to create authoritative deep male narrator
+        shift_cmd = [
+            FFMPEG_PATH, "-y", "-i", raw_tts,
+            "-af", "asetrate=24000*0.78,atempo=1.28,bass=g=8,volume=1.25",
+            voice_path
+        ]
+        subprocess.run(shift_cmd, check=True)
+        try: os.remove(raw_tts)
+        except: pass
+
         from broll_manager import get_video_duration
         total_dur = get_video_duration(voice_path)
         if total_dur <= 0:
@@ -178,10 +191,10 @@ async def create_voice_and_timing(lines: list, voice_path: str):
             cues.append((curr_time, curr_time + dur, txt))
             curr_time += dur
             
-        print(f"[+] Google TTS fallback generated successfully ({total_dur:.1f}s, {len(cues)} cues).", file=sys.stderr)
+        print(f"[+] Deep baritone voice generated ({total_dur:.1f}s, {len(cues)} cues).", file=sys.stderr)
         return cues
     except Exception as e:
-        print(f"[-] Google TTS fallback failed: {e}", file=sys.stderr)
+        print(f"[-] Voice fallback failed: {e}", file=sys.stderr)
         raise RuntimeError(f"All TTS engines failed: {e}")
 
 def format_ass_time(sec: float) -> str:
@@ -202,9 +215,9 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Normal,Arial Black,64,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,7,4,2,40,40,820,1
-Style: Gold,Arial Black,68,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,105,105,2,0,1,8,4,2,40,40,820,1
-Style: Red,Arial Black,70,&H002222FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,108,108,2,0,1,8,5,2,40,40,820,1
+Style: Normal,Arial Black,64,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,7,5,2,40,40,820,1
+Style: Gold,Arial Black,68,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,106,106,2,0,1,8,6,2,40,40,820,1
+Style: Red,Arial Black,70,&H002222FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,108,108,2,0,1,8,6,2,40,40,820,1
 Style: Badge,Arial Black,34,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,5,3,2,40,40,1650,1
 
 [Events]
@@ -256,19 +269,20 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     broll_source, broll_offset = broll_manager.get_unique_broll(segment_duration=28)
     print(f"[*] Applying unique B-Roll scene: {os.path.basename(broll_source)} (Offset: {broll_offset}s)")
 
-    # 5. Master Render with FFmpeg
+    # 5. Master Render with FFmpeg (Cinematic Vignette, 4K Sharpness, Color Grading)
     output_video = os.path.join(OUTPUT_DIR, f"arisvexx_{timestamp}.mp4")
     escaped_ass = ass_file.replace("\\", "/").replace(":", r"\:")
 
     filter_complex = (
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-        "eq=contrast=1.16:brightness=-0.02:saturation=0.92,"
-        "unsharp=3:3:0.8,"
+        "eq=contrast=1.20:brightness=-0.03:saturation=0.90,"
+        "vignette=PI/4.5,"
+        "unsharp=3:3:0.9,"
         f"ass='{escaped_ass}',"
         "drawtext=text='ARISVEXX':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=180:shadowcolor=black:shadowx=3:shadowy=3,"
         "drawtext=text='THE 48 LAWS OF POWER':fontsize=22:fontcolor=0xff2244:x=(w-text_w)/2:y=230:shadowcolor=black:shadowx=2:shadowy=2[v];"
-        "[1:a]volume=1.25[voice];"
-        "[2:a]volume=0.14[bgm];"
+        "[1:a]volume=1.30[voice];"
+        "[2:a]volume=0.15[bgm];"
         "[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]"
     )
 

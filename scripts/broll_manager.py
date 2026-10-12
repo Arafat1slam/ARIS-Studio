@@ -17,16 +17,26 @@ os.makedirs(BROLL_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
 
 BROLL_QUERIES = [
-    "thomas shelby scene pack 4k vertical",
-    "luxury car rainy night 4k vertical",
     "cillian murphy peaky blinders cold stare 4k",
-    "christian bale american psycho dark luxury 4k",
+    "christian bale american psycho dark luxury 4k vertical",
     "marcus aurelius stoic statue dark aesthetic 4k",
     "batman gotham dark cinematic aesthetic 4k",
+    "luxury car rainy night 4k vertical",
     "dark chess game slow motion cinematic 4k",
     "dark city rain street walking aesthetic 4k",
-    "peaky blinders badass scene pack 4k",
-    "dark aesthetic smoke silhouette 4k"
+    "thomas shelby badass scene pack 4k vertical",
+    "godfather mafia dark cigar aesthetic 4k",
+    "cyberpunk tokyo rain neon dark walking 4k",
+    "cillian murphy walking down street 4k edit",
+    "man in black suit slow motion rain 4k vertical",
+    "whiskey glass smoke dark luxury aesthetic 4k",
+    "rolls royce night rain dark aesthetic 4k",
+    "peaky blinders smoking cigarette slow motion 4k",
+    "ancient greek roman statue dramatic lighting 4k",
+    "interstellar space black hole dark cinematic 4k",
+    "fight club tyler durden dark aesthetic 4k",
+    "drive ryan gosling synthwave dark jacket 4k",
+    "blade runner 2049 officer k rain 4k vertical"
 ]
 
 def load_history():
@@ -55,11 +65,11 @@ def get_video_duration(filepath):
     return 30.0
 
 def download_fresh_broll(query):
-    print(f"[*] Searching & downloading fresh dark b-roll for: '{query}'...", file=sys.stderr)
+    print(f"[*] Searching & downloading fresh aesthetic B-Roll: '{query}'...", file=sys.stderr)
     try:
         search_cmd = [
             "yt-dlp",
-            f"ytsearch5:{query}",
+            f"ytsearch8:{query}",
             "--dump-json",
             "--flat-playlist"
         ]
@@ -80,10 +90,11 @@ def download_fresh_broll(query):
             print("[-] No candidate b-roll found online.", file=sys.stderr)
             return None
 
-        # Pick first candidate
+        # Randomly pick from candidates pool to guarantee visual variety
+        random.shuffle(candidates)
         vid_id, title = candidates[0]
         out_path = os.path.join(BROLL_DIR, f"broll_{vid_id}.mp4")
-        if os.path.exists(out_path):
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 100000:
             return out_path
 
         dl_cmd = [
@@ -96,7 +107,7 @@ def download_fresh_broll(query):
         ]
         dl_res = subprocess.run(dl_cmd, capture_output=True, text=True, errors="ignore")
         if os.path.exists(out_path) and os.path.getsize(out_path) > 100000:
-            print(f"[+] Downloaded fresh b-roll: {title[:40]} ({os.path.basename(out_path)})", file=sys.stderr)
+            print(f"[+] Downloaded unique fresh B-Roll: {title[:40]} ({os.path.basename(out_path)})", file=sys.stderr)
             return out_path
     except Exception as e:
         print(f"[-] Error downloading fresh b-roll: {e}", file=sys.stderr)
@@ -116,12 +127,6 @@ def get_unique_broll(segment_duration=28):
         if f.endswith((".mp4", ".webm", ".mkv")) and os.path.getsize(os.path.join(BROLL_DIR, f)) > 100000
     ]
 
-    # Also check if shelby_full exists in temp
-    temp_shelby = os.path.join(PROJECT_DIR, "data", "temp", "shelby_full.mp4")
-    if os.path.exists(temp_shelby) and temp_shelby not in local_files:
-        local_files.append(temp_shelby)
-
-    # Shuffle to vary usage
     random.shuffle(local_files)
 
     for fpath in local_files:
@@ -129,39 +134,39 @@ def get_unique_broll(segment_duration=28):
         dur = get_video_duration(fpath)
         used_offsets = used_videos.get(base_name, [])
 
-        # Candidate offsets spaced every segment_duration seconds
         candidate_offsets = []
-        offset = 0
+        offset = 5
         while offset + segment_duration <= dur:
             if offset not in used_offsets:
                 candidate_offsets.append(offset)
-            offset += int(segment_duration + 2)
+            offset += int(segment_duration + 5)
 
         if candidate_offsets:
+            random.shuffle(candidate_offsets)
             chosen_offset = candidate_offsets[0]
             if base_name not in used_videos:
                 used_videos[base_name] = []
             used_videos[base_name].append(chosen_offset)
             history["used_videos"] = used_videos
             save_history(history)
-            print(f"[*] Selected unique b-roll: {base_name} at offset {chosen_offset}s (Duration: {dur:.1f}s)", file=sys.stderr)
+            print(f"[*] Selected unique local B-Roll: {base_name} at offset {chosen_offset}s (Duration: {dur:.1f}s)", file=sys.stderr)
             return fpath, chosen_offset
 
-    # 2. If all local clips/segments are exhausted, download a fresh one!
-    query_idx = history.get("query_index", 0) % len(BROLL_QUERIES)
-    chosen_query = BROLL_QUERIES[query_idx]
-    history["query_index"] = (query_idx + 1) % len(BROLL_QUERIES)
-
+    # 2. Download fresh unique clip from diverse query pool
+    chosen_query = random.choice(BROLL_QUERIES)
     fresh_file = download_fresh_broll(chosen_query)
     if fresh_file and os.path.exists(fresh_file):
+        dur = get_video_duration(fresh_file)
+        max_start = max(5, int(dur - segment_duration - 5))
+        chosen_offset = random.randint(5, max_start) if max_start > 5 else 0
         base_name = os.path.basename(fresh_file)
         if base_name not in used_videos:
             used_videos[base_name] = []
-        used_videos[base_name].append(0)
+        used_videos[base_name].append(chosen_offset)
         history["used_videos"] = used_videos
         save_history(history)
-        print(f"[*] Selected freshly downloaded b-roll: {base_name} at offset 0s", file=sys.stderr)
-        return fresh_file, 0
+        print(f"[*] Selected freshly downloaded B-Roll: {base_name} at offset {chosen_offset}s", file=sys.stderr)
+        return fresh_file, chosen_offset
 
     # Fallback to whatever is available
     if local_files:

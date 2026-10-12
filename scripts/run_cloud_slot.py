@@ -62,7 +62,7 @@ def main():
 
     if target in ("ch2", "both"):
         ok = run_command(
-            [sys.executable, "scripts/dark_psychology_generator.py"],
+            [sys.executable, "scripts/dark_psychology_generator.py", "--auto"],
             "Channel 2 (ArisVexx - Dark Psychology Short)"
         )
         success = success and ok

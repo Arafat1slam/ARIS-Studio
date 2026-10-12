@@ -81,5 +81,7 @@ jobs:
         if: always()
         with:
           name: aris-published-videos-${{ github.run_number }}
-          path: uploaded/
+          path: |
+            uploaded/
+            not_uploaded/
           retention-days: 14

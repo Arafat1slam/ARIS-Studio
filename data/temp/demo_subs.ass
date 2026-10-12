@@ -1,0 +1,22 @@
+[Script Info]
+Title: ArisVexx Dark Psychology
+ScriptType: v4.00+
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial Black,54,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,1,0,1,6,3,2,60,60,420,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,00:00:00.10,00:00:05.99,Default,,0,0,0,,Psychology says: When a person goes silent, they have already made their decision.
+Dialogue: 0,00:00:05.94,00:00:09.71,Default,,0,0,0,,Rule 1: Never react to disrespect.
+Dialogue: 0,00:00:09.71,00:00:12.61,Default,,0,0,0,,Your silence is louder than anger.
+Dialogue: 0,00:00:12.61,00:00:16.06,Default,,0,0,0,,Rule 2: Keep your plans invisible.
+Dialogue: 0,00:00:16.06,00:00:19.32,Default,,0,0,0,,People cannot destroy what they do not know.
+Dialogue: 0,00:00:19.32,00:00:23.52,Default,,0,0,0,,Rule 3: Watch their eyes, not their lips.
+Dialogue: 0,00:00:23.52,00:00:25.76,Default,,0,0,0,,The eyes never lie.
+Dialogue: 0,00:00:25.76,00:00:28.44,Default,,0,0,0,,Subscribe to ArisVexx.

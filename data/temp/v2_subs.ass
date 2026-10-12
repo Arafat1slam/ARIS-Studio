@@ -1,0 +1,36 @@
+[Script Info]
+Title: ArisVexx Viral Captions V2
+ScriptType: v4.00+
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Normal,Arial Black,64,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,7,4,2,40,40,820,1
+Style: Gold,Arial Black,68,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,105,105,2,0,1,8,4,2,40,40,820,1
+Style: Red,Arial Black,70,&H002222FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,108,108,2,0,1,8,5,2,40,40,820,1
+Style: Badge,Arial Black,34,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,5,3,2,40,40,1650,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.05,0:00:03.50,Badge,,0,0,0,,WARNING: DARK PSYCHOLOGY
+Dialogue: 0,0:00:00.05,0:00:01.20,Gold,,0,0,0,,LOOK CLOSELY...
+Dialogue: 0,0:00:01.20,0:00:02.40,Normal,,0,0,0,,WHEN SOMEONE
+Dialogue: 0,0:00:02.40,0:00:03.78,Red,,0,0,0,,GOES SILENT...
+Dialogue: 0,0:00:03.78,0:00:04.90,Normal,,0,0,0,,THEY ALREADY MADE
+Dialogue: 0,0:00:04.90,0:00:06.06,Gold,,0,0,0,,THEIR DECISION.
+Dialogue: 0,0:00:06.06,0:00:07.40,Gold,,0,0,0,,RULE 1:
+Dialogue: 0,0:00:07.40,0:00:09.43,Normal,,0,0,0,,NEVER REACT TO DISRESPECT.
+Dialogue: 0,0:00:09.43,0:00:11.10,Normal,,0,0,0,,YOUR SILENCE...
+Dialogue: 0,0:00:11.10,0:00:12.91,Red,,0,0,0,,CUTS DEEPER THAN ANGER.
+Dialogue: 0,0:00:12.91,0:00:14.30,Gold,,0,0,0,,RULE 2:
+Dialogue: 0,0:00:14.30,0:00:16.22,Normal,,0,0,0,,KEEP YOUR MOVES INVISIBLE.
+Dialogue: 0,0:00:16.22,0:00:17.65,Normal,,0,0,0,,THEY CANNOT DESTROY...
+Dialogue: 0,0:00:17.65,0:00:19.15,Gold,,0,0,0,,WHAT THEY CANNOT SEE.
+Dialogue: 0,0:00:19.15,0:00:20.30,Red,,0,0,0,,RULE 3:
+Dialogue: 0,0:00:20.30,0:00:21.62,Red,,0,0,0,,IS THE MOST DANGEROUS.
+Dialogue: 0,0:00:21.62,0:00:23.10,Normal,,0,0,0,,WATCH THEIR EYES...
+Dialogue: 0,0:00:23.10,0:00:24.59,Gold,,0,0,0,,NOT THEIR LIPS.
+Dialogue: 0,0:00:24.59,0:00:26.66,Red,,0,0,0,,THE EYES NEVER LIE.

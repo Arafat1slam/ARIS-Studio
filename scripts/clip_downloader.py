@@ -7,6 +7,7 @@ Stores downloaded clips in data/approved_clips/ for processing.
 import os
 import sys
 import json
+import shutil
 import subprocess
 from datetime import datetime
 
@@ -51,6 +52,8 @@ def download_clip(url_or_query, max_duration=60):
     out_tmpl = os.path.join(OUTPUT_DIR, "%(title).50s_%(id)s.%(ext)s")
 
     ffmpeg_bin = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
+    if not os.path.exists(ffmpeg_bin):
+        ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--ffmpeg-location", ffmpeg_bin,

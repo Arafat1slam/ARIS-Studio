@@ -5,68 +5,102 @@ import subprocess
 from datetime import datetime, timedelta
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ORCHESTRATOR_PATH = os.path.join(PROJECT_DIR, "scripts", "pipeline_orchestrator.py")
+os.chdir(PROJECT_DIR)
 
-# Target schedule: 1:30 PM, 6:30 PM, 9:30 PM
-SCHEDULE_TIMES = [
-    ("13:30", "Midday Lunch Scroll"),
-    ("18:30", "Evening Peak"),
-    ("21:30", "Night Prime Time")
+SCHEDULE_SLOTS = [
+    # Channel 1: iταchι Live (Anime & Website CTA)
+    {
+        "time": "13:30",
+        "channel": "iταchι Live",
+        "script": "scripts/pipeline_orchestrator.py",
+        "args": ["--auto"],
+        "desc": "Anime Short: Midday Lunch Scroll"
+    },
+    {
+        "time": "18:30",
+        "channel": "iταchι Live",
+        "script": "scripts/pipeline_orchestrator.py",
+        "args": ["--auto"],
+        "desc": "Anime Short: Evening Peak"
+    },
+    {
+        "time": "21:30",
+        "channel": "iταchι Live",
+        "script": "scripts/pipeline_orchestrator.py",
+        "args": ["--auto"],
+        "desc": "Anime Short: Night Prime Time"
+    },
+    # Channel 2: ArisVexx (Dark Psychology / USA High-CPM Target)
+    {
+        "time": "22:00",
+        "channel": "ArisVexx",
+        "script": "scripts/dark_psychology_generator.py",
+        "args": [],
+        "desc": "Dark Psychology: US Noon Lunch (12:00 PM EST)"
+    },
+    {
+        "time": "01:30",
+        "channel": "ArisVexx",
+        "script": "scripts/dark_psychology_generator.py",
+        "args": [],
+        "desc": "Dark Psychology: US Afternoon Break (03:30 PM EST)"
+    },
+    {
+        "time": "06:30",
+        "channel": "ArisVexx",
+        "script": "scripts/dark_psychology_generator.py",
+        "args": [],
+        "desc": "Dark Psychology: US Prime Golden Hour (08:30 PM EST)"
+    }
 ]
 
-def get_next_run():
+def get_next_slot():
     now = datetime.now()
     today_str = now.strftime("%Y-%m-%d")
     
     candidates = []
-    for t_str, desc in SCHEDULE_TIMES:
-        dt = datetime.strptime(f"{today_str} {t_str}", "%Y-%m-%d %H:%M")
+    for slot in SCHEDULE_SLOTS:
+        dt = datetime.strptime(f"{today_str} {slot['time']}", "%Y-%m-%d %H:%M")
         if dt > now:
-            candidates.append((dt, desc))
-    
+            candidates.append((dt, slot))
+            
     if not candidates:
-        # Tomorrow's first slot
         tomorrow = now + timedelta(days=1)
-        t_str, desc = SCHEDULE_TIMES[0]
-        dt = datetime.strptime(f"{tomorrow.strftime('%Y-%m-%d')} {t_str}", "%Y-%m-%d %H:%M")
-        return dt, desc
-    
+        tmrw_str = tomorrow.strftime("%Y-%m-%d")
+        for slot in SCHEDULE_SLOTS:
+            dt = datetime.strptime(f"{tmrw_str} {slot['time']}", "%Y-%m-%d %H:%M")
+            candidates.append((dt, slot))
+            
     candidates.sort(key=lambda x: x[0])
     return candidates[0]
 
-def execute_pipeline():
-    print("\n" + "="*65)
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] TRIGGERING AUTOMATED CONTENT PIPELINE")
-    print("="*65)
-    print("[*] 1. Sourcing trending 4K viral anime clip...")
-    print("[*] 2. Remastering 1080x1920 anti-copyright canvas + audio...")
-    print("[*] 3. Generating viral AI SEO tags & description via Gemini...")
-    print("[*] 4. Publishing to YouTube Shorts & updating duplicate ledger...")
-    print("[*] 5. Auto-deleting local files to save disk space...")
-    print("="*65 + "\n")
+def execute_slot(slot: dict):
+    print("\n" + "="*68)
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] TRIGGERING SCHEDULED SLOT: {slot['channel'].upper()}")
+    print("="*68)
+    print(f"[*] Target Channel : {slot['channel']}")
+    print(f"[*] Slot Name      : {slot['desc']}")
+    print(f"[*] Engine Script  : {slot['script']}")
+    print("="*68 + "\n")
     
+    cmd = [sys.executable, slot["script"]] + slot.get("args", [])
     try:
-        proc = subprocess.run(
-            [sys.executable, ORCHESTRATOR_PATH, "--auto"],
-            cwd=PROJECT_DIR,
-            check=True
-        )
-        print(f"\n[+] Pipeline completed successfully at {datetime.now().strftime('%H:%M:%S')}")
-    except subprocess.CalledProcessError as e:
-        print(f"\n[-] Pipeline encountered an issue: {e}")
+        subprocess.run(cmd, check=True)
+        print(f"\n[+] Execution completed successfully for {slot['channel']} at {datetime.now().strftime('%H:%M:%S')}")
     except Exception as e:
-        print(f"\n[-] Unexpected error during execution: {e}")
+        print(f"\n[-] Slot execution issue: {e}")
 
 def main():
     os.system('cls' if os.name == 'nt' else 'clear')
-    print("===================================================================")
-    print("        ARIS CONTENT AUTOMATION SYSTEM - 24/7 AUTO SCHEDULER       ")
-    print("===================================================================")
-    print("  YouTube Channel : iταchι Live")
-    print("  Website CTA     : https://anime.ariswork.site")
-    print("  Schedule Slots  : 01:30 PM | 06:30 PM | 09:30 PM (Asia/Dhaka)")
-    print("  Storage Policy  : Auto-deletes videos after upload")
-    print("===================================================================\n")
+    print("====================================================================")
+    print("   ARIS CONTENT AUTOMATION SYSTEM - DUAL-CHANNEL 24/7 AUTO PILOT    ")
+    print("====================================================================")
+    print("  Channel 1 : iταchι Live  [Anime Clips -> anime.ariswork.site]")
+    print("              Slots: 01:30 PM | 06:30 PM | 09:30 PM (BST)")
+    print("  Channel 2 : ArisVexx     [Dark Psychology -> USA High-CPM Target]")
+    print("              Slots: 10:00 PM | 01:30 AM | 06:30 AM (BST = US PEAK)")
+    print("  Policy    : Fully autonomous sourcing, AI SEO, upload & cleanup")
+    print("====================================================================\n")
     
     last_triggered_minute = None
     
@@ -76,14 +110,14 @@ def main():
         current_minute_str = now.strftime("%Y-%m-%d %H:%M")
         
         # Check if current time matches any scheduled slot
-        for t_str, desc in SCHEDULE_TIMES:
-            if current_time_str == t_str and last_triggered_minute != current_minute_str:
+        for slot in SCHEDULE_SLOTS:
+            if current_time_str == slot["time"] and last_triggered_minute != current_minute_str:
                 last_triggered_minute = current_minute_str
-                print(f"\n[TIME HIT] Scheduled slot: {t_str} ({desc})! Executing now...")
-                execute_pipeline()
+                print(f"\n\n[TIME HIT] {slot['time']} ({slot['desc']}) triggered!")
+                execute_slot(slot)
                 break
-        
-        next_dt, next_desc = get_next_run()
+                
+        next_dt, next_slot = get_next_slot()
         remaining = next_dt - datetime.now()
         rem_sec = max(0, int(remaining.total_seconds()))
         hours, rem = divmod(rem_sec, 3600)
@@ -92,16 +126,15 @@ def main():
         
         status_line = (
             f"\r[*] Current: {now.strftime('%I:%M:%S %p')} | "
-            f"Next Upload: {next_dt.strftime('%I:%M %p')} ({next_desc}) in [{countdown}] | "
+            f"Next: [{next_slot['channel']}] in {countdown} ({next_dt.strftime('%I:%M %p')}) | "
             f"Status: STANDBY (Auto) "
         )
         sys.stdout.write(status_line)
         sys.stdout.flush()
-        
         time.sleep(1)
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n[*] Scheduler stopped by user.")
+        print("\n\n[*] Auto Pilot stopped by user.")

@@ -8,49 +8,55 @@ cls
 echo ===================================================================
 echo             ARIS CONTENT AUTOMATION SYSTEM - MASTER CONTROL
 echo ===================================================================
-echo   Channel  : itachi Live
-echo   Website  : https://anime.ariswork.site
-echo   Slots    : 01:30 PM ^| 06:30 PM ^| 09:30 PM (Daily 3x Viral Uploads)
+echo   Channel 1 : itachi Live  [Anime -^> anime.ariswork.site]
+echo               Slots: 01:30 PM ^| 06:30 PM ^| 09:30 PM (BST)
+echo.
+echo   Channel 2 : ArisVexx     [Dark Psychology -^> USA High-CPM Focus]
+echo               Slots: 10:00 PM ^| 01:30 AM ^| 06:30 AM (BST = US PEAK)
 echo ===================================================================
 echo.
-echo   [1] Start 24/7 Auto Pilot (Auto download, edit, upload at peak times)
-echo   [2] Trigger 1 Video Upload RIGHT NOW (Instant test)
-echo   [3] Start n8n Workflow Server (http://localhost:5678)
-echo   [4] View Published History Ledger
-echo   [5] Exit
+echo   [1] Start 24/7 Dual-Channel Auto Pilot (Anime + Dark Psychology)
+echo   [2] Trigger Instant Upload to itachi Live (Anime Short)
+echo   [3] Trigger Instant Upload to ArisVexx (Dark Psychology Short)
+echo   [4] Start n8n Workflow Web Server (http://localhost:5678)
+echo   [5] View Published History Ledger
+echo   [6] Exit
 echo.
 echo ===================================================================
-set /p choice="Select an option (1-5) [Default: 1]: "
+set /p choice="Select an option (1-6) [Default: 1]: "
 
 if "%choice%"=="" set choice=1
 if "%choice%"=="1" goto AUTOPILOT
-if "%choice%"=="2" goto INSTANT
-if "%choice%"=="3" goto N8N
-if "%choice%"=="4" goto LEDGER
-if "%choice%"=="5" exit
+if "%choice%"=="2" goto INSTANT_CH1
+if "%choice%"=="3" goto INSTANT_CH2
+if "%choice%"=="4" goto N8N
+if "%choice%"=="5" goto LEDGER
+if "%choice%"=="6" exit
 
 :AUTOPILOT
 cls
-echo [*] Launching 24/7 Automated Scheduler...
+echo [*] Launching 24/7 Dual-Channel Auto Pilot...
 python scripts\scheduler.py
 pause
 goto MENU
 
-:INSTANT
+:INSTANT_CH1
 cls
 echo ===================================================================
-echo             TRIGGERING INSTANT VIRAL VIDEO PIPELINE
+echo         TRIGGERING INSTANT UPLOAD: itachi Live (Anime Short)
 echo ===================================================================
-echo [*] Downloading trending 4K viral anime clip...
-echo [*] Applying anti-copyright remaster (1080x1920 HDR + Audio)...
-echo [*] Generating Gemini AI metadata...
-echo [*] Uploading to YouTube Shorts...
-echo [*] Auto-deleting local video file...
-echo ===================================================================
-echo.
 python scripts\pipeline_orchestrator.py --auto
 echo.
-echo [*] Instant pipeline execution completed!
+pause
+goto MENU
+
+:INSTANT_CH2
+cls
+echo ===================================================================
+echo         TRIGGERING INSTANT UPLOAD: ArisVexx (Dark Psychology)
+echo ===================================================================
+python scripts\dark_psychology_generator.py
+echo.
 pause
 goto MENU
 
@@ -69,7 +75,7 @@ cls
 echo ===================================================================
 echo                    RECENT PUBLISHED VIDEOS
 echo ===================================================================
-python -c "import json, os; p='config/ledger.json'; data=json.load(open(p, encoding='utf-8')) if os.path.exists(p) else {}; print('\n'.join([f'- [{r.get(\"published_at\",\"\")[:10]}] {r.get(\"title\",\"\")} (YT: https://youtube.com/shorts/{r.get(\"youtube_id\",\"\")})' for r in data.get('records', [])]) if data.get('records') else print('No videos in ledger yet.')"
+python -c "import json, os; p='config/ledger.json'; data=json.load(open(p, encoding='utf-8')) if os.path.exists(p) else {}; print('\n'.join([f'- [{r.get(\"channel\", \"itachi Live\")}] [{r.get(\"published_at\",\"\")[:10]}] {r.get(\"title\",\"\")} (https://youtube.com/shorts/{r.get(\"youtube_id\",\"\")})' for r in data.get('records', [])]) if data.get('records') else print('No videos in ledger yet.')"
 echo.
 pause
 goto MENU

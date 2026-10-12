@@ -33,6 +33,32 @@
     ],
     "cron_expression": "30 13,18,21 * * *"
   },
+  "channel_2": {
+    "name": "ArisVexx",
+    "niche": "Dark Psychology & Stoic Mindset",
+    "target_audience": "United States (Tier-1 High CPM)",
+    "daily_posts": 3,
+    "peak_active_times_usa": [
+      "10:00 PM BST (12:00 PM US EST Noon Lunch Scroll)",
+      "01:30 AM BST (03:30 PM US EST Afternoon Break)",
+      "06:30 AM BST (08:30 PM US EST Prime Evening Peak)"
+    ],
+    "schedule_slots_bd": [
+      "22:00",
+      "01:30",
+      "06:30"
+    ],
+    "default_hashtags": [
+      "#darkpsychology",
+      "#psychology",
+      "#lawsofpower",
+      "#stoicism",
+      "#sigmamindset",
+      "#mindset",
+      "#shorts",
+      "#viral"
+    ]
+  },
   "auto_sourcing": {
     "enabled": true,
     "max_duration_seconds": 60,

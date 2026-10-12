@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T15:56:48.711497Z",
+  "last_updated": "2026-10-12T16:02:31.436835Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -151,6 +151,16 @@
       "youtube_id": "5EHWF40cgr8",
       "status": "published",
       "timestamp": "2026-10-12T15:56:48.711493Z"
+    },
+    {
+      "content_hash": "e4168a19f314de86d385aeb53b484a8c33256a5738e7acf163260a73f2010082",
+      "video_file": "arisvexx_1791820864.mp4",
+      "title": "The Art of Silence (Law 4) | Dark Psychology",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T16:02:31.436662Z",
+      "youtube_id": "TMeCLE4JTMw",
+      "status": "published",
+      "timestamp": "2026-10-12T16:02:31.436830Z"
     }
   ]
 }

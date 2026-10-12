@@ -53,6 +53,7 @@ def get_youtube_token():
 
 def publish_to_youtube(video_path, title, description, tags=None, privacy="public", dry_run=False):
     """Upload video to YouTube as a Short."""
+    load_env()
     if dry_run or not os.environ.get("YOUTUBE_REFRESH_TOKEN"):
         print("[DRY-RUN] Simulating YouTube upload...", file=sys.stderr)
         return {

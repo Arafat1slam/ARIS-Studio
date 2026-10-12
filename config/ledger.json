@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T15:22:17.546934Z",
+  "last_updated": "2026-10-12T15:56:48.711497Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -141,6 +141,16 @@
       "youtube_id": "s4Zb6AT3IFE",
       "status": "published",
       "timestamp": "2026-10-12T15:22:17.546934Z"
+    },
+    {
+      "content_hash": "1dca8c19f43dc5c9d45a289ccf969084e732488acbef465743ed1d84caa4fac5",
+      "video_file": "arisvexx_1791820540.mp4",
+      "title": "Control The Game. #ArisVexxShorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T15:56:48.711356Z",
+      "youtube_id": "5EHWF40cgr8",
+      "status": "published",
+      "timestamp": "2026-10-12T15:56:48.711493Z"
     }
   ]
 }

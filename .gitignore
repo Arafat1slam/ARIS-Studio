@@ -31,6 +31,10 @@ data/processed_shorts/*
 !data/processed_shorts/.gitkeep
 data/approved_clips/*
 !data/approved_clips/.gitkeep
+data/broll/*
+!data/broll/.gitkeep
+data/temp/*
+!data/temp/.gitkeep
 data/logs/*.log
 !data/logs/.gitkeep
 

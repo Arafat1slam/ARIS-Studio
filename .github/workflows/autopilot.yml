@@ -62,26 +62,9 @@ jobs:
         env:
           ENV_CONTENT: ${{ secrets.ENV_CONTENT }}
         run: |
-          if [ -n "$ENV_CONTENT" ]; then
-            echo "$ENV_CONTENT" > .env
-          fi
-          echo "PIPELINE_MODE=auto" >> .env
-          echo "FFMPEG_PATH=ffmpeg" >> .env
+          python -c "import os; c = os.environ.get('ENV_CONTENT', ''); open('.env', 'w', encoding='utf-8').write(c + '\nPIPELINE_MODE=auto\nFFMPEG_PATH=ffmpeg\n') if c else None"
 
       - name: Run Cloud Video Engine & Publisher
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
-          YOUTUBE_CLIENT_ID_2: ${{ secrets.YOUTUBE_CLIENT_ID_2 }}
-          YOUTUBE_CLIENT_SECRET_2: ${{ secrets.YOUTUBE_CLIENT_SECRET_2 }}
-          YOUTUBE_REFRESH_TOKEN_2: ${{ secrets.YOUTUBE_REFRESH_TOKEN_2 }}
-          YOUTUBE_CHANNEL_2_ID: ${{ secrets.YOUTUBE_CHANNEL_2_ID }}
-          BRAND_NAME: "iταchι Live"
-          WEBSITE_URL: "https://anime.ariswork.site"
-          PIPELINE_MODE: "auto"
         run: |
           python scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
 

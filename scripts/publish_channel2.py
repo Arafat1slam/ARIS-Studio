@@ -7,21 +7,20 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 ENV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
-load_dotenv(ENV_PATH)
-
-CLIENT_ID_2 = os.getenv("YOUTUBE_CLIENT_ID_2") or os.getenv("YOUTUBE_CLIENT_ID")
-CLIENT_SECRET_2 = os.getenv("YOUTUBE_CLIENT_SECRET_2") or os.getenv("YOUTUBE_CLIENT_SECRET")
-REFRESH_TOKEN_2 = os.getenv("YOUTUBE_REFRESH_TOKEN_2")
-CHANNEL_ID_2 = os.getenv("YOUTUBE_CHANNEL_2_ID")
+load_dotenv(ENV_PATH, override=True)
 
 def get_channel2_access_token():
-    if not (CLIENT_ID_2 and CLIENT_SECRET_2 and REFRESH_TOKEN_2):
+    load_dotenv(ENV_PATH, override=True)
+    cid = (os.getenv("YOUTUBE_CLIENT_ID_2") or os.getenv("YOUTUBE_CLIENT_ID") or "").strip("'\"")
+    csec = (os.getenv("YOUTUBE_CLIENT_SECRET_2") or os.getenv("YOUTUBE_CLIENT_SECRET") or "").strip("'\"")
+    rtok = (os.getenv("YOUTUBE_REFRESH_TOKEN_2") or "").strip("'\"")
+    if not (cid and csec and rtok):
         raise ValueError("Missing Channel 2 credentials in .env")
 
     data = urllib.parse.urlencode({
-        "client_id": CLIENT_ID_2,
-        "client_secret": CLIENT_SECRET_2,
-        "refresh_token": REFRESH_TOKEN_2,
+        "client_id": cid,
+        "client_secret": csec,
+        "refresh_token": rtok,
         "grant_type": "refresh_token"
     }).encode("utf-8")
 

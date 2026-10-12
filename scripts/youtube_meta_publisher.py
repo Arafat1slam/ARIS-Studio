@@ -28,8 +28,7 @@ def load_env():
                     k, v = line.split("=", 1)
                     k = k.strip()
                     v = v.strip().strip("'\"")
-                    if k not in os.environ:
-                        os.environ[k] = v
+                    os.environ[k] = v
 
 def get_youtube_token():
     """Refresh YouTube OAuth2 access token."""

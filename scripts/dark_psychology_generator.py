@@ -132,13 +132,14 @@ def generate_script_with_ai():
 async def create_voice_and_timing(lines: list, voice_path: str):
     full_text = " ".join([line[0] for line in lines])
     
-    # 1. Try Edge-TTS (up to 4 retries across top neural male voices)
-    male_voices = ["en-US-BrianNeural", "en-US-ChristopherNeural", "en-US-GuyNeural"]
-    for attempt in range(1, 5):
-        chosen_voice = male_voices[(attempt - 1) % len(male_voices)]
+    # Strictly lock to the signature BrianNeural human narrator (ArisVexx original voice)
+    # Natural cadence, no robotic pitch distortion
+    target_voice = "en-US-BrianNeural"
+    
+    for attempt in range(1, 6):
         try:
-            print(f"[*] Generating deep male voiceover via Edge-TTS ({chosen_voice}, Attempt {attempt}/4)...", file=sys.stderr)
-            communicate = edge_tts.Communicate(full_text, voice=chosen_voice, rate="-3%", pitch="-1Hz")
+            print(f"[*] Generating signature natural male voiceover via Edge-TTS ({target_voice}, Attempt {attempt}/5)...", file=sys.stderr)
+            communicate = edge_tts.Communicate(full_text, voice=target_voice, rate="-2%")
             cues = []
             audio_data = bytearray()
             async for chunk in communicate.stream():
@@ -149,53 +150,30 @@ async def create_voice_and_timing(lines: list, voice_path: str):
                     d = chunk["duration"] / 10000000
                     cues.append((s, s + d, chunk["text"].strip()))
             
-            if audio_data and cues:
+            if audio_data:
                 with open(voice_path, "wb") as f:
                     f.write(audio_data)
-                print(f"[+] Edge-TTS deep male voice generated successfully ({len(cues)} cues).", file=sys.stderr)
+                
+                # If SentenceBoundary cues were not provided, compute proportional cues
+                if not cues:
+                    from broll_manager import get_video_duration
+                    total_dur = get_video_duration(voice_path) or 20.0
+                    total_chars = max(1, sum(len(line[0]) for line in lines))
+                    curr_time = 0.1
+                    for line in lines:
+                        txt = line[0]
+                        fraction = len(txt) / total_chars
+                        dur = max(1.2, fraction * (total_dur - 0.4))
+                        cues.append((curr_time, curr_time + dur, txt))
+                        curr_time += dur
+
+                print(f"[+] BrianNeural signature voice generated successfully ({len(cues)} cues).", file=sys.stderr)
                 return cues
         except Exception as e:
             print(f"[!] Edge-TTS attempt {attempt} failed: {e}", file=sys.stderr)
             await asyncio.sleep(2 * attempt)
-
-    # 2. Resilient Deep-Male Pitch-Shifted Fallback (NEVER female!)
-    print("[!] Transforming voice into deep baritone male voice...", file=sys.stderr)
-    try:
-        from gtts import gTTS
-        raw_tts = os.path.join(TEMP_DIR, f"raw_tts_{int(time.time())}.mp3")
-        tts = gTTS(text=full_text, lang='en', tld='us', slow=False)
-        tts.save(raw_tts)
-        
-        # Pitch-shift by -4 semitones and boost sub-bass to create authoritative deep male narrator
-        shift_cmd = [
-            FFMPEG_PATH, "-y", "-i", raw_tts,
-            "-af", "asetrate=24000*0.78,atempo=1.28,bass=g=8,volume=1.25",
-            voice_path
-        ]
-        subprocess.run(shift_cmd, check=True)
-        try: os.remove(raw_tts)
-        except: pass
-
-        from broll_manager import get_video_duration
-        total_dur = get_video_duration(voice_path)
-        if total_dur <= 0:
-            total_dur = 22.0
-            
-        total_chars = max(1, sum(len(line[0]) for line in lines))
-        curr_time = 0.1
-        cues = []
-        for line in lines:
-            txt = line[0]
-            fraction = len(txt) / total_chars
-            dur = max(1.2, fraction * (total_dur - 0.4))
-            cues.append((curr_time, curr_time + dur, txt))
-            curr_time += dur
-            
-        print(f"[+] Deep baritone voice generated ({total_dur:.1f}s, {len(cues)} cues).", file=sys.stderr)
-        return cues
-    except Exception as e:
-        print(f"[-] Voice fallback failed: {e}", file=sys.stderr)
-        raise RuntimeError(f"All TTS engines failed: {e}")
+    
+    raise RuntimeError("Edge-TTS voice generation failed after 5 attempts. Refusing distorted fallback.")
 
 def format_ass_time(sec: float) -> str:
     h = int(sec // 3600)

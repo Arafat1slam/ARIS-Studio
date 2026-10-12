@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T12:18:40.273292Z",
+  "last_updated": "2026-10-12T12:42:05.362657Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -71,6 +71,26 @@
       "youtube_id": null,
       "status": "published",
       "timestamp": "2026-10-12T12:18:40.273287Z"
+    },
+    {
+      "content_hash": "895e23beb3d1e433628cfe4077fc14dc2edf95a3da700dfd15f43c9ad024193b",
+      "video_file": "arisvexx_1791808300.mp4",
+      "title": "Master Their Minds: NOW #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T12:32:07.185264Z",
+      "youtube_id": "sim_arisvexx_1791786727",
+      "status": "published",
+      "timestamp": "2026-10-12T12:32:07.185264Z"
+    },
+    {
+      "content_hash": "474b43c3c9ce031d7d4830bdae436e949aec6d3d1c76bec5b13fe12bcace26b3",
+      "video_file": "arisvexx_1791808890.mp4",
+      "title": "Decode Their True Intentions. #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T12:42:05.362657Z",
+      "youtube_id": "JtAR4riq5ZA",
+      "status": "published",
+      "timestamp": "2026-10-12T12:42:05.362657Z"
     }
   ]
 }

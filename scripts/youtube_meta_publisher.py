@@ -224,26 +224,24 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     }
     duplicate_checker.add_record(record)
 
-    # Step 6: Archive to 'uploaded/' folder for manual Facebook Reels & TikTok posting
-    if (yt_res.get("success") or tt_res.get("success")) and not dry_run:
+    # Step 6: Archive to 'uploaded/' folder for preview or manual posting
+    try:
+        import archive_uploaded_videos
+        archive_uploaded_videos.save_to_uploaded_archive(
+            video_path=video_path,
+            title=title,
+            description=description,
+            tags=tags,
+            channel="Itachi_Live",
+            move=False if dry_run else True
+        )
+    except Exception as e:
+        print(f"[-] Archive notice: {e}", file=sys.stderr)
         try:
-            import archive_uploaded_videos
-            archive_uploaded_videos.save_to_uploaded_archive(
-                video_path=video_path,
-                title=title,
-                description=description,
-                tags=tags,
-                channel="Itachi_Live",
-                move=True
-            )
-        except Exception as e:
-            print(f"[-] Archive notice: {e}", file=sys.stderr)
-            # Fallback cleanup only if archive failed
-            try:
-                if os.path.exists(video_path):
-                    os.remove(video_path)
-            except Exception:
-                pass
+            if os.path.exists(video_path) and not dry_run:
+                os.remove(video_path)
+        except Exception:
+            pass
 
     return {
         "success": True,

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 ENV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(ENV_PATH, override=True)
+CHANNEL_ID_2 = os.getenv("CHANNEL_ID_2", "UC8fUiqkYQWcrYd-rO4f5RzQ")
 
 def get_channel2_access_token():
     load_dotenv(ENV_PATH, override=True)

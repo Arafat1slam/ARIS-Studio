@@ -68,7 +68,7 @@ def download_fresh_broll(query):
     print(f"[*] Searching & downloading fresh aesthetic B-Roll: '{query}'...", file=sys.stderr)
     try:
         search_cmd = [
-            "yt-dlp",
+            sys.executable, "-m", "yt_dlp",
             f"ytsearch8:{query}",
             "--dump-json",
             "--flat-playlist"
@@ -98,7 +98,7 @@ def download_fresh_broll(query):
             return out_path
 
         dl_cmd = [
-            "yt-dlp",
+            sys.executable, "-m", "yt_dlp",
             "--ffmpeg-location", FFMPEG_PATH,
             "-f", "bestvideo[height<=1080]/best[height<=1080]",
             "-o", out_path,
@@ -120,6 +120,7 @@ def get_unique_broll(segment_duration=28):
     """
     history = load_history()
     used_videos = history.get("used_videos", {})
+    last_used = history.get("last_used_video", "")
 
     # 1. Check local files in BROLL_DIR
     local_files = [
@@ -127,19 +128,26 @@ def get_unique_broll(segment_duration=28):
         if f.endswith((".mp4", ".webm", ".mkv")) and os.path.getsize(os.path.join(BROLL_DIR, f)) > 100000
     ]
 
-    random.shuffle(local_files)
-
+    # Prioritize files that are NOT the last used one, sorted by least used
+    candidates = []
     for fpath in local_files:
+        base_name = os.path.basename(fpath)
+        times_used = len(used_videos.get(base_name, []))
+        is_last = 1 if base_name == last_used and len(local_files) > 1 else 0
+        candidates.append((is_last, times_used, random.random(), fpath))
+    candidates.sort()
+
+    for _, _, _, fpath in candidates:
         base_name = os.path.basename(fpath)
         dur = get_video_duration(fpath)
         used_offsets = used_videos.get(base_name, [])
 
         candidate_offsets = []
-        offset = 5
+        offset = 0 if dur <= (segment_duration + 8) else 3
         while offset + segment_duration <= dur:
             if offset not in used_offsets:
                 candidate_offsets.append(offset)
-            offset += int(segment_duration + 5)
+            offset += int(segment_duration + 3)
 
         if candidate_offsets:
             random.shuffle(candidate_offsets)
@@ -148,11 +156,12 @@ def get_unique_broll(segment_duration=28):
                 used_videos[base_name] = []
             used_videos[base_name].append(chosen_offset)
             history["used_videos"] = used_videos
+            history["last_used_video"] = base_name
             save_history(history)
-            print(f"[*] Selected unique local B-Roll: {base_name} at offset {chosen_offset}s (Duration: {dur:.1f}s)", file=sys.stderr)
+            print(f"[*] Selected unique B-Roll: {base_name} (Used {len(used_offsets)+1}x) at offset {chosen_offset}s (Total: {dur:.1f}s)", file=sys.stderr)
             return fpath, chosen_offset
 
-    # 2. Download fresh unique clip from diverse query pool
+    # 2. If all local clips exhausted their offsets, download fresh unique clip from diverse query pool
     chosen_query = random.choice(BROLL_QUERIES)
     fresh_file = download_fresh_broll(chosen_query)
     if fresh_file and os.path.exists(fresh_file):
@@ -164,13 +173,14 @@ def get_unique_broll(segment_duration=28):
             used_videos[base_name] = []
         used_videos[base_name].append(chosen_offset)
         history["used_videos"] = used_videos
+        history["last_used_video"] = base_name
         save_history(history)
         print(f"[*] Selected freshly downloaded B-Roll: {base_name} at offset {chosen_offset}s", file=sys.stderr)
         return fresh_file, chosen_offset
 
-    # Fallback to whatever is available
+    # Fallback
     if local_files:
-        fallback = local_files[0]
+        fallback = random.choice(local_files)
         rand_off = random.randint(0, max(0, int(get_video_duration(fallback) - segment_duration)))
         return fallback, rand_off
 

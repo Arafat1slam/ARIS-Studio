@@ -7,6 +7,8 @@ import asyncio
 import subprocess
 import shutil
 import edge_tts
+import urllib.request
+import base64
 from datetime import datetime
 from dotenv import load_dotenv
 

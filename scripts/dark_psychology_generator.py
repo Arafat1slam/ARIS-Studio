@@ -272,6 +272,11 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
         "[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]"
     )
 
+    # Exact video duration based on voiceover to prevent any FFmpeg infinite looping
+    voice_dur = cues[-1][1] if cues else 22.0
+    target_duration = round(voice_dur + 1.2, 2)
+    print(f"[*] Target Short duration: {target_duration}s (Voice: {voice_dur:.1f}s)")
+
     cmd = [
         FFMPEG_PATH,
         "-y",
@@ -284,17 +289,17 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
         "-filter_complex", filter_complex,
         "-map", "[v]",
         "-map", "[a]",
+        "-t", str(target_duration),
         "-c:v", "libx264",
-        "-preset", "fast",
-        "-crf", "18",
+        "-preset", "veryfast",
+        "-crf", "19",
         "-c:a", "aac",
-        "-b:a", "256k",
-        "-shortest",
+        "-b:a", "192k",
         output_video
     ]
 
-    print("[*] Rendering video canvas (CRF 18 visually lossless)...")
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+    print("[*] Rendering video canvas with strict duration limit...")
+    subprocess.run(cmd, check=True)
     print(f"[+] Video rendered successfully: {os.path.basename(output_video)} ({os.path.getsize(output_video)/(1024*1024):.2f} MB)")
 
     # 6. Compute Hash

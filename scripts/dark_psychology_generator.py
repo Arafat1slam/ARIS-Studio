@@ -131,18 +131,58 @@ def generate_script_with_ai():
 
 async def create_voice_and_timing(lines: list, voice_path: str):
     full_text = " ".join([line[0] for line in lines])
-    communicate = edge_tts.Communicate(full_text, voice="en-US-BrianNeural", rate="-2%")
     
-    cues = []
-    with open(voice_path, "wb") as f:
-        async for chunk in communicate.stream():
-            if chunk["type"] == "audio":
-                f.write(chunk["data"])
-            elif chunk["type"] == "SentenceBoundary":
-                s = chunk["offset"] / 10000000
-                d = chunk["duration"] / 10000000
-                cues.append((s, s + d, chunk["text"].strip()))
-    return cues
+    # 1. Try Edge-TTS (up to 3 retries with backoff)
+    for attempt in range(1, 4):
+        try:
+            print(f"[*] Generating neural voiceover via Edge-TTS (Attempt {attempt}/3)...", file=sys.stderr)
+            communicate = edge_tts.Communicate(full_text, voice="en-US-BrianNeural", rate="-2%")
+            cues = []
+            audio_data = bytearray()
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    audio_data.extend(chunk["data"])
+                elif chunk["type"] == "SentenceBoundary":
+                    s = chunk["offset"] / 10000000
+                    d = chunk["duration"] / 10000000
+                    cues.append((s, s + d, chunk["text"].strip()))
+            
+            if audio_data and cues:
+                with open(voice_path, "wb") as f:
+                    f.write(audio_data)
+                print(f"[+] Edge-TTS generated successfully ({len(cues)} cues).", file=sys.stderr)
+                return cues
+        except Exception as e:
+            print(f"[!] Edge-TTS attempt {attempt} failed: {e}", file=sys.stderr)
+            await asyncio.sleep(2 * attempt)
+
+    # 2. Resilient fallback to Google TTS if datacenter IP blocked
+    print("[!] Falling back to Google TTS engine...", file=sys.stderr)
+    try:
+        from gtts import gTTS
+        tts = gTTS(text=full_text, lang='en', tld='us', slow=False)
+        tts.save(voice_path)
+        
+        from broll_manager import get_video_duration
+        total_dur = get_video_duration(voice_path)
+        if total_dur <= 0:
+            total_dur = 22.0
+            
+        total_chars = max(1, sum(len(line[0]) for line in lines))
+        curr_time = 0.1
+        cues = []
+        for line in lines:
+            txt = line[0]
+            fraction = len(txt) / total_chars
+            dur = max(1.2, fraction * (total_dur - 0.4))
+            cues.append((curr_time, curr_time + dur, txt))
+            curr_time += dur
+            
+        print(f"[+] Google TTS fallback generated successfully ({total_dur:.1f}s, {len(cues)} cues).", file=sys.stderr)
+        return cues
+    except Exception as e:
+        print(f"[-] Google TTS fallback failed: {e}", file=sys.stderr)
+        raise RuntimeError(f"All TTS engines failed: {e}")
 
 def format_ass_time(sec: float) -> str:
     h = int(sec // 3600)

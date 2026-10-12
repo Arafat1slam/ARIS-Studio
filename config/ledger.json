@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-11T22:38:26.007006Z",
+  "last_updated": "2026-10-12T00:15:56.501400Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -20,6 +20,16 @@
       "tiktok_id": null,
       "status": "published",
       "timestamp": "2026-10-11T22:38:26.007006Z"
+    },
+    {
+      "content_hash": "4d42ae8754f5114be77b7669d979920958ec0a0fed8059317f9cd6ffaefbea1f",
+      "video_file": "arisvexx_dark_psychology_v2.mp4",
+      "title": "When Someone Goes Silent... Dark Psychology #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T00:15:56.494177Z",
+      "youtube_id": "uK1GMCUC0Tk",
+      "status": "published",
+      "timestamp": "2026-10-12T00:15:56.501400Z"
     }
   ]
 }

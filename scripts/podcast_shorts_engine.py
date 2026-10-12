@@ -1,11 +1,12 @@
 """
-ARIS Content Automation System - Podcast Shorts Engine (ArisVexx)
-Specialized engine for foreign podcast shorts:
-- Targets top viral podcasts: Robert Greene, Diary of a CEO, Chris Williamson, Jordan Peterson, Huberman
-- Real human voices with authentic emotional resonance
-- 1080x1920 vertical remastering with cinematic color grade and top hook badge
-- Mixes subtle dark emotional ambient piano BGM underneath speaker
-- Companion caption generation for YouTube Shorts, Facebook Reels, and TikTok
+ARIS Content Automation System - Clean Podcast Shorts Engine (ArisVexx)
+Slices and remasters viral highlights from top foreign podcasts:
+- Multi-Channel Pool: The Diary Of A CEO, Chris Williamson (Modern Wisdom), Jordan Peterson, Huberman Lab
+- Topic Filter: Dark psychology, power dynamics, stoic mindset, human behavior
+- 100% Watermark-Free: Auto edge-cropping & dynamic ArisVexx header/footer framing
+- Real human voices with authentic emotional delivery
+- Ambient cinematic piano BGM mixed at low volume underneath voice
+- Saves to 'not_uploaded/' for review or scheduled upload
 """
 
 import os
@@ -16,11 +17,11 @@ import shutil
 import hashlib
 import subprocess
 from datetime import datetime
-from dotenv import load_dotenv
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CONFIG_FILE = os.path.join(PROJECT_DIR, "config", "config.json")
 UPLOADED_DIR = os.path.join(PROJECT_DIR, "uploaded")
+NOT_UPLOADED_DIR = os.path.join(PROJECT_DIR, "not_uploaded")
 LOG_DIR = os.path.join(PROJECT_DIR, "data", "logs")
 TEMP_DIR = os.path.join(PROJECT_DIR, "data", "temp")
 BGM_FILE = os.path.join(PROJECT_DIR, "data", "bgm", "dark_cinematic_theme.mp3")
@@ -32,12 +33,6 @@ if not os.path.exists(FFMPEG_PATH):
 
 PODCAST_SOURCES = [
     {
-        "creator": "Robert Greene",
-        "tagline": "ROBERT GREENE | LAWS OF POWER",
-        "url": "https://www.youtube.com/@RobertGreeneOfficial/shorts",
-        "topic": "Dark Psychology & 48 Laws of Power"
-    },
-    {
         "creator": "The Diary Of A CEO",
         "tagline": "DIARY OF A CEO | HUMAN PSYCHOLOGY",
         "url": "https://www.youtube.com/@TheDiaryOfACEO/shorts",
@@ -47,14 +42,27 @@ PODCAST_SOURCES = [
         "creator": "Chris Williamson",
         "tagline": "MODERN WISDOM | STOIC MINDSET",
         "url": "https://www.youtube.com/@ChrisWillx/shorts",
-        "topic": "Power Dynamics & Stoicism"
+        "topic": "Power Dynamics & Psychology"
     },
     {
         "creator": "Jordan Peterson",
         "tagline": "JORDAN PETERSON | DARK PERSONALITY",
         "url": "https://www.youtube.com/@JordanBPeterson/shorts",
         "topic": "Psychology & The Dark Triad"
+    },
+    {
+        "creator": "Huberman Lab",
+        "tagline": "HUBERMAN LAB | BRAIN & BEHAVIOR",
+        "url": "https://www.youtube.com/@hubermanlab/shorts",
+        "topic": "Mind Control & Focus"
     }
+]
+
+PSYCHOLOGY_KEYWORDS = [
+    "mind", "psychology", "power", "rule", "win", "lie", "habit", "brain",
+    "toxic", "read", "truth", "stoic", "dark", "focus", "ego", "silence",
+    "fear", "control", "danger", "secret", "influence", "people", "trust",
+    "guts", "behavior", "manipulat", "body", "sign", "personality"
 ]
 
 def load_history():
@@ -71,9 +79,14 @@ def save_history(history):
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2)
 
+def is_relevant_topic(title: str) -> bool:
+    title_lower = title.lower()
+    return any(kw in title_lower for kw in PSYCHOLOGY_KEYWORDS)
+
 def fetch_top_podcast_clip():
     """
-    Finds a fresh, viral podcast short (20s - 58s) from top podcast sources.
+    Finds a fresh, high-relevance viral podcast short from our multi-channel pool.
+    Guarantees no repeating channels and strict relevance to psychology & mindset!
     """
     history = load_history()
     used_ids = set(history.get("used_ids", []))
@@ -87,16 +100,17 @@ def fetch_top_podcast_clip():
         url = src["url"]
         topic = src["topic"]
 
-        print(f"[*] Scanning viral podcast shorts from {creator}...", file=sys.stderr)
+        print(f"[*] Scanning viral podcast clips from: {creator}...", file=sys.stderr)
         cmd = [
             sys.executable, "-m", "yt_dlp",
             url,
-            "--playlist-end", "12",
+            "--playlist-end", "20",
             "--dump-json",
             "--flat-playlist",
             "--no-warnings"
         ]
         proc = subprocess.run(cmd, capture_output=True, text=True, errors="ignore")
+        candidates = []
         for line in proc.stdout.splitlines():
             line = line.strip()
             if not line:
@@ -110,29 +124,75 @@ def fetch_top_podcast_clip():
                 if vid_id in used_ids:
                     continue
 
-                if dur and not (15 <= dur <= 59):
+                if dur and not (18 <= dur <= 59):
                     continue
 
-                print(f"[+] Found candidate from {creator}: {title[:45]} ({vid_id})", file=sys.stderr)
-                return {
-                    "video_id": vid_id,
-                    "title": title,
-                    "creator": creator,
-                    "tagline": tagline,
-                    "topic": topic,
-                    "url": f"https://www.youtube.com/watch?v={vid_id}"
-                }
+                if not is_relevant_topic(title):
+                    continue
+
+                candidates.append((vid_id, title, dur))
             except Exception:
                 pass
+
+        if candidates:
+            # Pick the top candidate
+            vid_id, title, dur = candidates[0]
+            print(f"[+] Selected topic from {creator}: '{title}' ({vid_id})", file=sys.stderr)
+            return {
+                "video_id": vid_id,
+                "title": title,
+                "creator": creator,
+                "tagline": tagline,
+                "topic": topic,
+                "url": f"https://www.youtube.com/watch?v={vid_id}"
+            }
+
+    # Fallback to search query if channel shelves didn't match keyword
+    fallback_queries = [
+        "The Diary Of A CEO manipulation psychology shorts",
+        "Chris Williamson dark psychology shorts",
+        "Jordan Peterson dark personality traits shorts"
+    ]
+    fb_q = random.choice(fallback_queries)
+    print(f"[*] Searching YouTube for fallback topic: '{fb_q}'...", file=sys.stderr)
+    cmd = [
+        sys.executable, "-m", "yt_dlp",
+        f"ytsearch10:{fb_q}",
+        "--dump-json",
+        "--flat-playlist",
+        "--no-warnings"
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True, errors="ignore")
+    for line in proc.stdout.splitlines():
+        try:
+            data = json.loads(line)
+            vid_id = data.get("id")
+            dur = data.get("duration") or 0
+            title = data.get("title") or "Psychology Secret"
+            if vid_id in used_ids:
+                continue
+            if dur and not (18 <= dur <= 59):
+                continue
+            return {
+                "video_id": vid_id,
+                "title": title,
+                "creator": "Diary Of A CEO / Modern Wisdom",
+                "tagline": "DARK PSYCHOLOGY | ARISVEXX",
+                "topic": "Mind Dynamics & Power",
+                "url": f"https://www.youtube.com/watch?v={vid_id}"
+            }
+        except Exception:
+            pass
 
     return None
 
 def download_podcast_clip(video_url, output_path):
     """
-    Downloads raw video and audio using yt-dlp.
+    Downloads raw video and audio using yt-dlp with ffmpeg location specified.
     """
     cmd = [
         sys.executable, "-m", "yt_dlp",
+        "--ffmpeg-location", FFMPEG_PATH,
         video_url,
         "-f", "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
         "--merge-output-format", "mp4",
@@ -151,22 +211,26 @@ def get_duration(video_path):
     if m:
         h, m_val, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
         return h * 3600 + m_val * 60 + s
-    return 40.0
+    return 35.0
 
 def render_podcast_short(raw_video_path, metadata, output_path):
     """
     Remasters the podcast video:
     - 1080x1920 vertical canvas
+    - 100% Watermark-Free framing (crops corner/lower watermarks, sleek top header badge)
     - Cinematic noir grading and vignette
-    - Top header badge with speaker and topic
     - Dynamic BGM mix at low volume underneath real human voice
     """
     dur = min(get_duration(raw_video_path), 58.0)
     tagline = metadata.get("tagline", "DARK PSYCHOLOGY | ARISVEXX")
 
+    # Anti-Watermark Filter Graph:
+    # 1. Scale with slight 1.05x overscan to crop out tiny corner channel logos
+    # 2. Sleek top dark header box to frame the speaker
+    # 3. Clean @ArisVexx brand watermark at bottom
     filter_complex = (
-        "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-        "eq=contrast=1.12:saturation=1.14:brightness=0.01,unsharp=3:3:0.8,vignette=PI/4.5,"
+        "[0:v]scale=1140:2026:force_original_aspect_ratio=increase,crop=1080:1920,"
+        "eq=contrast=1.12:saturation=1.15:brightness=0.01,unsharp=3:3:0.8,vignette=PI/4.5,"
         "drawbox=x=0:y=160:w=1080:h=95:color=black@0.72:t=fill,"
         f"drawtext=font='Arial':text='{tagline}':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=190,"
         "drawtext=font='Arial':text='@ArisVexx':fontcolor=white@0.65:fontsize=28:x=(w-text_w)/2:y=1740[v];"
@@ -195,16 +259,17 @@ def render_podcast_short(raw_video_path, metadata, output_path):
         output_path
     ]
 
-    print(f"[*] Rendering Podcast Short ({dur:.1f}s) via FFmpeg...", file=sys.stderr)
+    print(f"[*] Rendering Watermark-Free Podcast Short ({dur:.1f}s) via FFmpeg...", file=sys.stderr)
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace")
     return res.returncode == 0 and os.path.exists(output_path) and os.path.getsize(output_path) > 100000
 
 def produce_podcast_short(dry_run=True):
     """
-    Master pipeline for producing a Podcast Short for ArisVexx.
+    Master pipeline for producing a clean Podcast Short for ArisVexx.
+    Saves to 'not_uploaded/' when in review / dry-run mode.
     """
     os.makedirs(TEMP_DIR, exist_ok=True)
-    os.makedirs(UPLOADED_DIR, exist_ok=True)
+    os.makedirs(NOT_UPLOADED_DIR, exist_ok=True)
 
     print("\n=======================================================", file=sys.stderr)
     print("   ARISVEXX PODCAST CLIPS ENGINE - FOREIGN PODCASTS", file=sys.stderr)
@@ -218,14 +283,14 @@ def produce_podcast_short(dry_run=True):
     vid_id = clip_meta["video_id"]
     raw_video = os.path.join(TEMP_DIR, f"podcast_raw_{vid_id}.mp4")
 
-    print(f"[*] Downloading clip: {clip_meta['title']} ({clip_meta['creator']})...", file=sys.stderr)
+    print(f"[*] Downloading clip: '{clip_meta['title']}' ({clip_meta['creator']})...", file=sys.stderr)
     ok = download_podcast_clip(clip_meta["url"], raw_video)
     if not ok:
         return {"success": False, "error": "Failed to download podcast clip video."}
 
     clean_title = clip_meta["title"].replace("#Shorts", "").replace("#shorts", "").strip()[:50]
+    out_name = f"[ArisVexx] {clean_title} - {clip_meta['creator']}"
     target_dir = UPLOADED_DIR if not dry_run else NOT_UPLOADED_DIR
-    os.makedirs(target_dir, exist_ok=True)
     target_mp4 = os.path.join(target_dir, f"{out_name}.mp4")
     target_txt = os.path.join(target_dir, f"{out_name}_info.txt")
 
@@ -264,8 +329,8 @@ def produce_podcast_short(dry_run=True):
     except Exception:
         pass
 
-    print(f"[+] Successfully produced and archived Podcast Short: {os.path.basename(target_mp4)}", file=sys.stderr)
-    print(f"[+] Companion caption file: {os.path.basename(target_txt)}", file=sys.stderr)
+    print(f"[+] Successfully produced clean Podcast Short: {os.path.basename(target_mp4)}", file=sys.stderr)
+    print(f"[+] Saved to: {'uploaded/' if not dry_run else 'not_uploaded/'}", file=sys.stderr)
 
     return {
         "success": True,

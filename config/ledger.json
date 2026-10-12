@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T12:57:53.792845Z",
+  "last_updated": "2026-10-12T13:14:18.144386Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -81,6 +81,16 @@
       "youtube_id": "sim_arisvexx_1791786727",
       "status": "published",
       "timestamp": "2026-10-12T12:32:07.185264Z"
+    },
+    {
+      "content_hash": "4b611b52c0f9414f3a0763d03b2ff6776f047ed16fc98390293ebd3f53f93401",
+      "video_file": "arisvexx_1791810824.mp4",
+      "title": "They'll NEVER See YOU Coming! #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T13:14:18.143385Z",
+      "youtube_id": "sim_arisvexx_1791789258",
+      "status": "published",
+      "timestamp": "2026-10-12T13:14:18.144386Z"
     }
   ]
 }

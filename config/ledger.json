@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T12:42:05.362657Z",
+  "last_updated": "2026-10-12T12:57:53.792845Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -54,11 +54,11 @@
     },
     {
       "content_hash": "77f9b8f1c71b86773c4693d352fa289e13cecbe046edad4ad58998651d819d76",
-      "video_file": "arisvexx_1791792808.mp4",
-      "title": "Unlock Your Dark Power. #Shorts",
+      "video_file": "[ArisVexx] Unlock Your Dark Power.mp4",
+      "title": "Unlock Your Dark Power #Shorts",
       "channel": "ArisVexx",
-      "published_at": "2026-10-12T08:14:02.465358Z",
-      "youtube_id": "sim_arisvexx_1791771242",
+      "published_at": "2026-10-12T12:57:53.792339Z",
+      "youtube_id": "AuVayaZlTMo",
       "status": "published",
       "timestamp": "2026-10-12T08:14:02.465358Z"
     },
@@ -81,16 +81,6 @@
       "youtube_id": "sim_arisvexx_1791786727",
       "status": "published",
       "timestamp": "2026-10-12T12:32:07.185264Z"
-    },
-    {
-      "content_hash": "474b43c3c9ce031d7d4830bdae436e949aec6d3d1c76bec5b13fe12bcace26b3",
-      "video_file": "arisvexx_1791808890.mp4",
-      "title": "Decode Their True Intentions. #Shorts",
-      "channel": "ArisVexx",
-      "published_at": "2026-10-12T12:42:05.362657Z",
-      "youtube_id": "JtAR4riq5ZA",
-      "status": "published",
-      "timestamp": "2026-10-12T12:42:05.362657Z"
     }
   ]
 }

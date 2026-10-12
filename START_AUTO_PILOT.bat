@@ -22,10 +22,11 @@ echo   [4] Start n8n Workflow Web Server (http://localhost:5678)
 echo   [5] View Published History Ledger
 echo   [6] Open 'uploaded' Folder in File Explorer (for FB & TikTok manual uploads)
 echo   [7] Sync / Re-download Missing Uploaded Videos
-echo   [8] Exit
+echo   [8] Generate Foreign Podcast Short Preview (Robert Greene / Diary of a CEO)
+echo   [9] Exit
 echo.
 echo ===================================================================
-set /p choice="Select an option (1-8) [Default: 1]: "
+set /p choice="Select an option (1-9) [Default: 1]: "
 
 if "%choice%"=="" set choice=1
 if "%choice%"=="1" goto AUTOPILOT
@@ -35,7 +36,8 @@ if "%choice%"=="4" goto N8N
 if "%choice%"=="5" goto LEDGER
 if "%choice%"=="6" goto OPEN_UPLOADED
 if "%choice%"=="7" goto SYNC_UPLOADED
-if "%choice%"=="8" exit
+if "%choice%"=="8" goto PODCAST_PREVIEW
+if "%choice%"=="9" exit
 
 :AUTOPILOT
 cls
@@ -96,6 +98,16 @@ echo ===================================================================
 echo     SYNCING / RE-DOWNLOADING ALL PUBLISHED SHORTS TO 'uploaded/'
 echo ===================================================================
 python scripts\archive_uploaded_videos.py
+echo.
+pause
+goto MENU
+
+:PODCAST_PREVIEW
+cls
+echo ===================================================================
+echo     GENERATING FOREIGN PODCAST SHORT PREVIEW (Robert Greene / Huberman)
+echo ===================================================================
+python scripts\podcast_shorts_engine.py
 echo.
 pause
 goto MENU

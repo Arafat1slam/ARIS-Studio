@@ -6,14 +6,14 @@
     "deployment": "local-first"
   },
   "pipeline": {
-    "mode": "auto",
-    "review_gate_enabled": false,
+    "mode": "review",
+    "review_gate_enabled": true,
     "schedule_cron": "30 13,18,21 * * *",
     "timezone": "Asia/Dhaka",
     "website_url": "https://anime.ariswork.site",
     "brand_name": "ARIS ANIME",
     "channel_name": "iταchι Live",
-    "auto_delete_after_publish": true,
+    "auto_delete_after_publish": false,
     "default_hashtags": [
       "#anime",
       "#animereels",

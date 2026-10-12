@@ -385,6 +385,14 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     }
 
 if __name__ == "__main__":
-    is_dry = "--dry-run" in sys.argv
+    cfg_review = True
+    try:
+        with open(os.path.join(PROJECT_DIR, "config", "config.json"), "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+            cfg_review = cfg.get("pipeline", {}).get("review_gate_enabled", True)
+    except Exception:
+        pass
+    force_auto = "--auto" in sys.argv
+    is_dry = "--dry-run" in sys.argv or (cfg_review and not force_auto)
     res = produce_arisvexx_short(dry_run=is_dry)
     print(json.dumps(res, indent=2))

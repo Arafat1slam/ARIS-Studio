@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T08:14:02.465358Z",
+  "last_updated": "2026-10-12T12:18:40.273292Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -61,6 +61,16 @@
       "youtube_id": "sim_arisvexx_1791771242",
       "status": "published",
       "timestamp": "2026-10-12T08:14:02.465358Z"
+    },
+    {
+      "content_hash": "021d6dcdcd5a09d92a08af386d8ad42b3e4199d6d65cb4ec1f93ad7833273965",
+      "video_file": "arisvexx_1791807473.mp4",
+      "title": "Master Their Mind: Ultimate Control #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-12T12:18:40.273156Z",
+      "youtube_id": null,
+      "status": "published",
+      "timestamp": "2026-10-12T12:18:40.273287Z"
     }
   ]
 }

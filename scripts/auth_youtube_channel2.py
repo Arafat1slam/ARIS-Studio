@@ -9,8 +9,8 @@ from dotenv import load_dotenv, set_key
 ENV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(ENV_PATH)
 
-CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
+CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID_2") or os.getenv("YOUTUBE_CLIENT_ID")
+CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET_2") or os.getenv("YOUTUBE_CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8080/callback"
 PORT = 8080
 

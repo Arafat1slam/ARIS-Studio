@@ -351,24 +351,31 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     }
     duplicate_checker.add_record(record)
 
-    # 10. Archive to 'uploaded/' folder for preview or manual posting
+    # 10. Route to 'uploaded/' if live, otherwise 'not_uploaded/'
     try:
         import archive_uploaded_videos
-        archive_uploaded_videos.save_to_uploaded_archive(
-            video_path=output_video,
-            title=title,
-            description=desc,
-            tags=["darkpsychology", "lawsofpower", "stoic", "mindset", "arisvexx", "sigmarules", "psychologyfacts", "shorts"],
-            channel="ArisVexx",
-            move=False if dry_run else True
-        )
+        is_live_yt = pub_res.get("success") and not dry_run and pub_res.get("video_id") and not str(pub_res.get("video_id", "")).startswith("sim_")
+        if is_live_yt:
+            archive_uploaded_videos.save_to_uploaded_archive(
+                video_path=output_video,
+                title=title,
+                description=desc,
+                tags=["darkpsychology", "lawsofpower", "stoic", "mindset", "arisvexx", "sigmarules", "psychologyfacts", "shorts"],
+                channel="ArisVexx",
+                move=True,
+                youtube_id=pub_res.get("video_id")
+            )
+        else:
+            archive_uploaded_videos.save_to_not_uploaded(
+                video_path=output_video,
+                title=title,
+                description=desc,
+                tags=["darkpsychology", "lawsofpower", "stoic", "mindset", "arisvexx", "sigmarules", "psychologyfacts", "shorts"],
+                channel="ArisVexx",
+                move=True
+            )
     except Exception as e:
         print(f"[-] Archive notice: {e}")
-        try:
-            if os.path.exists(output_video) and not dry_run:
-                os.remove(output_video)
-        except Exception:
-            pass
 
     # Clean temps
     for t_file in [voice_file, ass_file]:

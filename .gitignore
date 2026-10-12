@@ -39,6 +39,8 @@ data/logs/*.log
 !data/logs/.gitkeep
 uploaded/*
 !uploaded/.gitkeep
+not_uploaded/*
+!not_uploaded/.gitkeep
 
 # Operating System Files
 Thumbs.db

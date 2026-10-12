@@ -20,13 +20,14 @@ echo   [2] Trigger Instant Upload to itachi Live (Anime Short)
 echo   [3] Trigger Instant Upload to ArisVexx (Dark Psychology Short)
 echo   [4] Start n8n Workflow Web Server (http://localhost:5678)
 echo   [5] View Published History Ledger
-echo   [6] Open 'uploaded' Folder in File Explorer (for FB & TikTok manual uploads)
-echo   [7] Sync / Re-download Missing Uploaded Videos
+echo   [6] Open 'uploaded' Folder (Live on YouTube - Ready for FB & TikTok)
+echo   [7] Open 'not_uploaded' Folder (New generated videos pending upload)
 echo   [8] Generate Foreign Podcast Short Preview (Robert Greene / Diary of a CEO)
-echo   [9] Exit
+echo   [9] Sync / Re-download Missing Uploaded Videos
+echo   [10] Exit
 echo.
 echo ===================================================================
-set /p choice="Select an option (1-9) [Default: 1]: "
+set /p choice="Select an option (1-10) [Default: 1]: "
 
 if "%choice%"=="" set choice=1
 if "%choice%"=="1" goto AUTOPILOT
@@ -35,9 +36,10 @@ if "%choice%"=="3" goto INSTANT_CH2
 if "%choice%"=="4" goto N8N
 if "%choice%"=="5" goto LEDGER
 if "%choice%"=="6" goto OPEN_UPLOADED
-if "%choice%"=="7" goto SYNC_UPLOADED
+if "%choice%"=="7" goto OPEN_NOT_UPLOADED
 if "%choice%"=="8" goto PODCAST_PREVIEW
-if "%choice%"=="9" exit
+if "%choice%"=="9" goto SYNC_UPLOADED
+if "%choice%"=="10" exit
 
 :AUTOPILOT
 cls
@@ -90,6 +92,12 @@ goto MENU
 cls
 echo [*] Opening 'uploaded' folder in Windows Explorer...
 explorer uploaded
+goto MENU
+
+:OPEN_NOT_UPLOADED
+cls
+echo [*] Opening 'not_uploaded' folder in Windows Explorer...
+explorer not_uploaded
 goto MENU
 
 :SYNC_UPLOADED

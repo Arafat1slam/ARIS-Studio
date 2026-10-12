@@ -224,9 +224,10 @@ def produce_podcast_short(dry_run=True):
         return {"success": False, "error": "Failed to download podcast clip video."}
 
     clean_title = clip_meta["title"].replace("#Shorts", "").replace("#shorts", "").strip()[:50]
-    out_name = f"[ArisVexx] {clean_title} - {clip_meta['creator']}"
-    target_mp4 = os.path.join(UPLOADED_DIR, f"{out_name}.mp4")
-    target_txt = os.path.join(UPLOADED_DIR, f"{out_name}_info.txt")
+    target_dir = UPLOADED_DIR if not dry_run else NOT_UPLOADED_DIR
+    os.makedirs(target_dir, exist_ok=True)
+    target_mp4 = os.path.join(target_dir, f"{out_name}.mp4")
+    target_txt = os.path.join(target_dir, f"{out_name}_info.txt")
 
     rendered = render_podcast_short(raw_video, clip_meta, target_mp4)
     if not rendered:

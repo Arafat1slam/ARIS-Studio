@@ -224,24 +224,31 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     }
     duplicate_checker.add_record(record)
 
-    # Step 6: Archive to 'uploaded/' folder for preview or manual posting
+    # Step 6: Route to 'uploaded/' if live, otherwise 'not_uploaded/'
     try:
         import archive_uploaded_videos
-        archive_uploaded_videos.save_to_uploaded_archive(
-            video_path=video_path,
-            title=title,
-            description=description,
-            tags=tags,
-            channel="Itachi_Live",
-            move=False if dry_run else True
-        )
+        is_live_yt = yt_res.get("success") and not dry_run and not str(yt_res.get("video_id", "")).startswith("sim_")
+        if is_live_yt:
+            archive_uploaded_videos.save_to_uploaded_archive(
+                video_path=video_path,
+                title=title,
+                description=description,
+                tags=tags,
+                channel="Itachi_Live",
+                move=True,
+                youtube_id=yt_res.get("video_id")
+            )
+        else:
+            archive_uploaded_videos.save_to_not_uploaded(
+                video_path=video_path,
+                title=title,
+                description=description,
+                tags=tags,
+                channel="Itachi_Live",
+                move=True
+            )
     except Exception as e:
         print(f"[-] Archive notice: {e}", file=sys.stderr)
-        try:
-            if os.path.exists(video_path) and not dry_run:
-                os.remove(video_path)
-        except Exception:
-            pass
 
     return {
         "success": True,

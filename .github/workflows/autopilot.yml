@@ -58,6 +58,16 @@ jobs:
         run: |
           mkdir -p data/approved_clips data/processed_shorts data/broll data/temp data/logs uploaded
 
+      - name: Prepare Environment File
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_CONTENT }}
+        run: |
+          if [ -n "$ENV_CONTENT" ]; then
+            echo "$ENV_CONTENT" > .env
+          fi
+          echo "PIPELINE_MODE=auto" >> .env
+          echo "FFMPEG_PATH=ffmpeg" >> .env
+
       - name: Run Cloud Video Engine & Publisher
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

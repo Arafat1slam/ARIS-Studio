@@ -5,6 +5,7 @@ import time
 import hashlib
 import asyncio
 import subprocess
+import shutil
 import edge_tts
 from datetime import datetime
 from dotenv import load_dotenv

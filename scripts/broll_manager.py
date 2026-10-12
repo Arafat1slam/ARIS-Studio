@@ -3,6 +3,7 @@ import sys
 import json
 import random
 import subprocess
+import shutil
 import re
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

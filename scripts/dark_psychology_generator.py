@@ -289,13 +289,25 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     }
     duplicate_checker.add_record(record)
 
-    # 10. Auto-Delete Local Video
+    # 10. Archive to 'uploaded/' folder for manual Facebook Reels & TikTok posting
     if pub_res.get("success") and not dry_run:
         try:
-            os.remove(output_video)
-            print(f"[+] Auto-deleted local video to conserve disk space: {os.path.basename(output_video)}")
+            import archive_uploaded_videos
+            archive_uploaded_videos.save_to_uploaded_archive(
+                video_path=output_video,
+                title=title,
+                description=desc,
+                tags=["darkpsychology", "lawsofpower", "stoic", "mindset", "arisvexx", "sigmarules", "psychologyfacts", "shorts"],
+                channel="ArisVexx",
+                move=True
+            )
         except Exception as e:
-            print(f"[-] Cleanup notice: {e}")
+            print(f"[-] Archive notice: {e}")
+            try:
+                if os.path.exists(output_video):
+                    os.remove(output_video)
+            except Exception:
+                pass
 
     # Clean temps
     for t_file in [voice_file, ass_file]:

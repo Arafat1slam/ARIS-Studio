@@ -20,10 +20,12 @@ echo   [2] Trigger Instant Upload to itachi Live (Anime Short)
 echo   [3] Trigger Instant Upload to ArisVexx (Dark Psychology Short)
 echo   [4] Start n8n Workflow Web Server (http://localhost:5678)
 echo   [5] View Published History Ledger
-echo   [6] Exit
+echo   [6] Open 'uploaded' Folder in File Explorer (for FB & TikTok manual uploads)
+echo   [7] Sync / Re-download Missing Uploaded Videos
+echo   [8] Exit
 echo.
 echo ===================================================================
-set /p choice="Select an option (1-6) [Default: 1]: "
+set /p choice="Select an option (1-8) [Default: 1]: "
 
 if "%choice%"=="" set choice=1
 if "%choice%"=="1" goto AUTOPILOT
@@ -31,7 +33,9 @@ if "%choice%"=="2" goto INSTANT_CH1
 if "%choice%"=="3" goto INSTANT_CH2
 if "%choice%"=="4" goto N8N
 if "%choice%"=="5" goto LEDGER
-if "%choice%"=="6" exit
+if "%choice%"=="6" goto OPEN_UPLOADED
+if "%choice%"=="7" goto SYNC_UPLOADED
+if "%choice%"=="8" exit
 
 :AUTOPILOT
 cls
@@ -76,6 +80,22 @@ echo ===================================================================
 echo                    RECENT PUBLISHED VIDEOS
 echo ===================================================================
 python -c "import json, os; p='config/ledger.json'; data=json.load(open(p, encoding='utf-8')) if os.path.exists(p) else {}; print('\n'.join([f'- [{r.get(\"channel\", \"itachi Live\")}] [{r.get(\"published_at\",\"\")[:10]}] {r.get(\"title\",\"\")} (https://youtube.com/shorts/{r.get(\"youtube_id\",\"\")})' for r in data.get('records', [])]) if data.get('records') else print('No videos in ledger yet.')"
+echo.
+pause
+goto MENU
+
+:OPEN_UPLOADED
+cls
+echo [*] Opening 'uploaded' folder in Windows Explorer...
+explorer uploaded
+goto MENU
+
+:SYNC_UPLOADED
+cls
+echo ===================================================================
+echo     SYNCING / RE-DOWNLOADING ALL PUBLISHED SHORTS TO 'uploaded/'
+echo ===================================================================
+python scripts\archive_uploaded_videos.py
 echo.
 pause
 goto MENU

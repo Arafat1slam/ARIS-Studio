@@ -225,14 +225,26 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     }
     duplicate_checker.add_record(record)
 
-    # Step 6: Auto-delete video file to save disk space
+    # Step 6: Archive to 'uploaded/' folder for manual Facebook Reels & TikTok posting
     if (yt_res.get("success") or tt_res.get("success")) and not dry_run:
         try:
-            if os.path.exists(video_path):
-                os.remove(video_path)
-                print(f"[+] Auto-deleted local video after publishing: {os.path.basename(video_path)}", file=sys.stderr)
+            import archive_uploaded_videos
+            archive_uploaded_videos.save_to_uploaded_archive(
+                video_path=video_path,
+                title=title,
+                description=description,
+                tags=tags,
+                channel="Itachi_Live",
+                move=True
+            )
         except Exception as e:
-            print(f"[-] Auto-delete notice: {e}", file=sys.stderr)
+            print(f"[-] Archive notice: {e}", file=sys.stderr)
+            # Fallback cleanup only if archive failed
+            try:
+                if os.path.exists(video_path):
+                    os.remove(video_path)
+            except Exception:
+                pass
 
     return {
         "success": True,

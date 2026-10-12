@@ -27,6 +27,17 @@ TEMP_DIR = os.path.join(PROJECT_DIR, "data", "temp")
 BGM_FILE = os.path.join(PROJECT_DIR, "data", "bgm", "dark_cinematic_theme.mp3")
 HISTORY_FILE = os.path.join(LOG_DIR, "podcast_history.json")
 
+def get_podcast_phonk_track():
+    candidates = [
+        os.path.join(PROJECT_DIR, "data", "bgm", "dark_drift_phonk_1.mp3"),
+        os.path.join(PROJECT_DIR, "data", "bgm", "shadow_force_phonk.mp3"),
+        os.path.join(PROJECT_DIR, "data", "bgm", "aggressive_drift_phonk.mp3")
+    ]
+    existing = [f for f in candidates if os.path.exists(f)]
+    if existing:
+        return random.choice(existing)
+    return BGM_FILE
+
 FFMPEG_PATH = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
 if not os.path.exists(FFMPEG_PATH):
     FFMPEG_PATH = shutil.which("ffmpeg") or "ffmpeg"
@@ -228,14 +239,15 @@ def render_podcast_short(raw_video_path, metadata, output_path):
     # 1. Scale with slight 1.05x overscan to crop out tiny corner channel logos
     # 2. Sleek top dark header box to frame the speaker
     # 3. Clean @ArisVexx brand watermark at bottom
+    selected_bgm = get_podcast_phonk_track()
     filter_complex = (
         "[0:v]scale=1140:2026:force_original_aspect_ratio=increase,crop=1080:1920,"
         "eq=contrast=1.12:saturation=1.15:brightness=0.01,unsharp=3:3:0.8,vignette=PI/4.5,"
         "drawbox=x=0:y=160:w=1080:h=95:color=black@0.72:t=fill,"
-        f"drawtext=font='Arial':text='{tagline}':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=190,"
-        "drawtext=font='Arial':text='@ArisVexx':fontcolor=white@0.65:fontsize=28:x=(w-text_w)/2:y=1740[v];"
-        "[0:a]volume=1.20,bass=g=3:f=120[voice];"
-        "[1:a]volume=0.14[bgm];"
+        f"drawtext=text='{tagline}':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=190:shadowcolor=black:shadowx=2:shadowy=2,"
+        "drawtext=text='@ArisVexx':fontcolor=white@0.75:fontsize=28:x=(w-text_w)/2:y=1740:shadowcolor=black:shadowx=2:shadowy=2[v];"
+        "[0:a]volume=1.28,bass=g=3:f=120[voice];"
+        "[1:a]volume=0.18,bass=g=4:f=90[bgm];"
         "[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]"
     )
 
@@ -245,7 +257,7 @@ def render_podcast_short(raw_video_path, metadata, output_path):
         "-i", raw_video_path,
         "-stream_loop", "-1",
         "-ss", "0", "-t", str(dur),
-        "-i", BGM_FILE,
+        "-i", selected_bgm,
         "-filter_complex", filter_complex,
         "-map", "[v]",
         "-map", "[a]",
@@ -259,7 +271,7 @@ def render_podcast_short(raw_video_path, metadata, output_path):
         output_path
     ]
 
-    print(f"[*] Rendering Watermark-Free Podcast Short ({dur:.1f}s) via FFmpeg...", file=sys.stderr)
+    print(f"[*] Rendering Watermark-Free Podcast Short ({dur:.1f}s) with Phonk BGM ({os.path.basename(selected_bgm)})...", file=sys.stderr)
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace")
     return res.returncode == 0 and os.path.exists(output_path) and os.path.getsize(output_path) > 100000
 

@@ -204,6 +204,37 @@ def format_ass_time(sec: float) -> str:
     ms = int(round((sec - int(sec)) * 100))
     return f"{h}:{m:02d}:{s:02d}.{ms:02d}"
 
+def chunk_text(text: str, start_sec: float, end_sec: float, style: str):
+    words = text.strip().split()
+    if not words:
+        return []
+    if len(words) <= 3:
+        chunks = [words]
+    elif len(words) == 4:
+        chunks = [words[:2], words[2:]]
+    elif len(words) == 5:
+        chunks = [words[:3], words[3:]]
+    elif len(words) == 6:
+        chunks = [words[:3], words[3:]]
+    else:
+        chunks = []
+        i = 0
+        while i < len(words):
+            take = 3 if (len(words) - i) >= 5 or (len(words) - i) == 3 else 2
+            chunks.append(words[i:i+take])
+            i += take
+
+    total_chars = max(1, sum(sum(len(w) for w in ch) for ch in chunks))
+    dur = max(0.5, end_sec - start_sec)
+    res = []
+    curr_t = start_sec
+    for ch in chunks:
+        ch_len = sum(len(w) for w in ch)
+        ch_dur = (ch_len / total_chars) * dur
+        res.append((curr_t, curr_t + ch_dur, ch, style))
+        curr_t += ch_dur
+    return res
+
 def build_ass_subtitles(badge: str, lines: list, cues: list, ass_path: str):
     header = """[Script Info]
 Title: ArisVexx Viral Subtitles
@@ -215,30 +246,54 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Normal,Arial Black,64,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,7,5,2,40,40,820,1
-Style: Gold,Arial Black,68,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,106,106,2,0,1,8,6,2,40,40,820,1
-Style: Red,Arial Black,70,&H002222FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,108,108,2,0,1,8,6,2,40,40,820,1
-Style: Badge,Arial Black,34,&H0000E5FF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,5,3,2,40,40,1650,1
+Style: ViralMain,Arial Black,72,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,8,4,2,40,40,760,1
+Style: HookBadge,Arial Black,34,&H0000FFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,3,0,1,6,3,2,40,40,1660,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     dialogues = []
-    # Badge for first 3.5s
-    dialogues.append(f"Dialogue: 0,0:00:00.05,0:00:03.50,Badge,,0,0,0,,{badge}")
-    
+    # Badge for first 3.8s
+    dialogues.append(f"Dialogue: 0,0:00:00.05,0:00:03.80,HookBadge,,0,0,0,,{badge}")
+
     # Map lines to cues
     total = min(len(lines), len(cues))
     for i in range(total):
         start_sec, end_sec, _ = cues[i]
-        text, style = lines[i]
-        s_str = format_ass_time(start_sec)
-        e_str = format_ass_time(end_sec)
-        clean_text = text.upper().replace('"', '').replace("'", "")
-        dialogues.append(f"Dialogue: 0,{s_str},{e_str},{style},,0,0,0,,{clean_text}")
+        raw_text, style = lines[i]
+        chunks = chunk_text(raw_text, start_sec, end_sec, style)
+        for c_start, c_end, words, c_style in chunks:
+            s_str = format_ass_time(c_start)
+            e_str = format_ass_time(c_end)
+            formatted_words = []
+            for idx, w in enumerate(words):
+                w_clean = w.upper().replace('"', '').replace("'", "")
+                if idx == len(words) - 1:
+                    if c_style == "Gold":
+                        formatted_words.append(f"{{\\c&H0000FFFF&}}{w_clean}{{\\c&H00FFFFFF&}}")
+                    elif c_style == "Red":
+                        formatted_words.append(f"{{\\c&H002222FF&}}{w_clean}{{\\c&H00FFFFFF&}}")
+                    else:
+                        formatted_words.append(f"{{\\c&H00FFFF00&}}{w_clean}{{\\c&H00FFFFFF&}}")
+                else:
+                    formatted_words.append(w_clean)
+            chunk_line_text = " ".join(formatted_words)
+            dialogues.append(f"Dialogue: 0,{s_str},{e_str},ViralMain,,0,0,0,,{chunk_line_text}")
 
     with open(ass_path, "w", encoding="utf-8") as f:
         f.write(header + "\n".join(dialogues) + "\n")
+
+def get_dark_phonk_track():
+    candidates = [
+        os.path.join(PROJECT_DIR, "data", "bgm", "dark_drift_phonk_1.mp3"),
+        os.path.join(PROJECT_DIR, "data", "bgm", "shadow_force_phonk.mp3"),
+        os.path.join(PROJECT_DIR, "data", "bgm", "aggressive_drift_phonk.mp3"),
+    ]
+    existing = [f for f in candidates if os.path.exists(f)]
+    if existing:
+        import random
+        return random.choice(existing)
+    return BGM_FILE
 
 def produce_arisvexx_short(dry_run: bool = False) -> dict:
     timestamp = int(time.time())
@@ -272,6 +327,8 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
     # 5. Master Render with FFmpeg (Cinematic Vignette, 4K Sharpness, Color Grading)
     output_video = os.path.join(OUTPUT_DIR, f"arisvexx_{timestamp}.mp4")
     escaped_ass = ass_file.replace("\\", "/").replace(":", r"\:")
+    selected_bgm = get_dark_phonk_track()
+    print(f"[*] Selected Dark Phonk BGM: {os.path.basename(selected_bgm)}")
 
     filter_complex = (
         "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
@@ -281,8 +338,8 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
         f"ass='{escaped_ass}',"
         "drawtext=text='ARISVEXX':fontsize=36:fontcolor=white:x=(w-text_w)/2:y=180:shadowcolor=black:shadowx=3:shadowy=3,"
         "drawtext=text='THE 48 LAWS OF POWER':fontsize=22:fontcolor=0xff2244:x=(w-text_w)/2:y=230:shadowcolor=black:shadowx=2:shadowy=2[v];"
-        "[1:a]volume=1.30[voice];"
-        "[2:a]volume=0.15[bgm];"
+        "[1:a]volume=1.35,bass=g=3:f=110[voice];"
+        "[2:a]volume=0.22,bass=g=5:f=80[bgm];"
         "[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]"
     )
 
@@ -299,7 +356,7 @@ def produce_arisvexx_short(dry_run: bool = False) -> dict:
         "-i", broll_source,
         "-i", voice_file,
         "-stream_loop", "-1",
-        "-i", BGM_FILE,
+        "-i", selected_bgm,
         "-filter_complex", filter_complex,
         "-map", "[v]",
         "-map", "[a]",

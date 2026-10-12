@@ -18,6 +18,8 @@ import duplicate_checker
 import publish_channel2
 
 FFMPEG_PATH = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
+if not os.path.exists(FFMPEG_PATH):
+    FFMPEG_PATH = shutil.which("ffmpeg") or "ffmpeg"
 BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "data", "processed_shorts")
 TEMP_DIR = os.path.join(PROJECT_DIR, "data", "temp")

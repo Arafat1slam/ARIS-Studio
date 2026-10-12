@@ -9,6 +9,8 @@ PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll")
 HISTORY_FILE = os.path.join(PROJECT_DIR, "data", "logs", "broll_history.json")
 FFMPEG_PATH = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
+if not os.path.exists(FFMPEG_PATH):
+    FFMPEG_PATH = shutil.which("ffmpeg") or "ffmpeg"
 
 os.makedirs(BROLL_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)

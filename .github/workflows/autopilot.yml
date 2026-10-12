@@ -1,0 +1,92 @@
+name: ARIS 24/7 Cloud Auto-Pilot
+
+on:
+  schedule:
+    # Channel 1: iταchι Live (Anime Viral Shorts)
+    - cron: '30 7 * * *'    # 01:30 PM BST (07:30 UTC)
+    - cron: '30 12 * * *'   # 06:30 PM BST (12:30 UTC)
+    - cron: '30 15 * * *'   # 09:30 PM BST (15:30 UTC)
+    # Channel 2: ArisVexx (Dark Psychology - USA High-CPM Peak)
+    - cron: '00 16 * * *'   # 10:00 PM BST = 12:00 PM US EST Lunch (16:00 UTC)
+    - cron: '30 19 * * *'   # 01:30 AM BST = 03:30 PM US EST Commute (19:30 UTC)
+    - cron: '30 0 * * *'    # 06:30 AM BST = 08:30 PM US EST Bedtime (00:30 UTC)
+
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target Channel to trigger'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - ch1
+          - ch2
+          - both
+
+permissions:
+  contents: write
+
+jobs:
+  run-autopilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install System Dependencies (FFmpeg & Fonts)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-liberation fonts-freefont-ttf
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Prepare Working Directories
+        run: |
+          mkdir -p data/approved_clips data/processed_shorts data/broll data/temp data/logs uploaded
+
+      - name: Run Cloud Video Engine & Publisher
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
+          YOUTUBE_CLIENT_ID_2: ${{ secrets.YOUTUBE_CLIENT_ID_2 }}
+          YOUTUBE_CLIENT_SECRET_2: ${{ secrets.YOUTUBE_CLIENT_SECRET_2 }}
+          YOUTUBE_REFRESH_TOKEN_2: ${{ secrets.YOUTUBE_REFRESH_TOKEN_2 }}
+          YOUTUBE_CHANNEL_2_ID: ${{ secrets.YOUTUBE_CHANNEL_2_ID }}
+          BRAND_NAME: "iταchι Live"
+          WEBSITE_URL: "https://anime.ariswork.site"
+          PIPELINE_MODE: "auto"
+        run: |
+          python scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
+
+      - name: Sync Ledger and Logs to Repository
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add config/ledger.json data/logs/
+          git diff-index --quiet HEAD || (git commit -m "chore(autopilot): update ledger & logs [skip ci]" && git push)
+
+      - name: Upload Published Videos for Mobile / Manual FB & TikTok Posting
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aris-published-videos-${{ github.run_number }}
+          path: uploaded/
+          retention-days: 14

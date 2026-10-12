@@ -15,6 +15,8 @@ PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 UPLOADED_DIR = os.path.join(PROJECT_DIR, "uploaded")
 LEDGER_PATH = os.path.join(PROJECT_DIR, "config", "ledger.json")
 FFMPEG_PATH = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
+if not os.path.exists(FFMPEG_PATH):
+    FFMPEG_PATH = shutil.which("ffmpeg") or "ffmpeg"
 
 os.makedirs(UPLOADED_DIR, exist_ok=True)
 

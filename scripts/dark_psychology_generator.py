@@ -129,16 +129,39 @@ def generate_script_with_ai():
         import random
         return random.choice(PRESET_SCRIPTS)
 
+def generate_gemini_tts(text: str, voice_name: str = "Charon") -> bytes:
+    import base64
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("Missing GEMINI_API_KEY for Gemini TTS")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={api_key}"
+    payload = {
+        "contents": [{"parts": [{"text": text}]}],
+        "generationConfig": {
+            "response_modalities": ["AUDIO"],
+            "speechConfig": {
+                "voiceConfig": {
+                    "prebuiltVoiceConfig": {
+                        "voiceName": voice_name
+                    }
+                }
+            }
+        }
+    }
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=25) as r:
+        res = json.loads(r.read().decode("utf-8"))
+        raw_b64 = res["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+        return base64.b64decode(raw_b64)
+
 async def create_voice_and_timing(lines: list, voice_path: str):
     full_text = " ".join([line[0] for line in lines])
     
-    # Strictly lock to the signature BrianNeural human narrator (ArisVexx original voice)
-    # Natural cadence, no robotic pitch distortion
+    # 1. Primary: Edge-TTS BrianNeural (Natural human narrator)
     target_voice = "en-US-BrianNeural"
-    
-    for attempt in range(1, 6):
+    for attempt in range(1, 3):
         try:
-            print(f"[*] Generating signature natural male voiceover via Edge-TTS ({target_voice}, Attempt {attempt}/5)...", file=sys.stderr)
+            print(f"[*] Generating signature natural male voiceover via Edge-TTS ({target_voice}, Attempt {attempt}/2)...", file=sys.stderr)
             communicate = edge_tts.Communicate(full_text, voice=target_voice, rate="-2%")
             cues = []
             audio_data = bytearray()
@@ -154,7 +177,6 @@ async def create_voice_and_timing(lines: list, voice_path: str):
                 with open(voice_path, "wb") as f:
                     f.write(audio_data)
                 
-                # If SentenceBoundary cues were not provided, compute proportional cues
                 if not cues:
                     from broll_manager import get_video_duration
                     total_dur = get_video_duration(voice_path) or 20.0
@@ -171,9 +193,45 @@ async def create_voice_and_timing(lines: list, voice_path: str):
                 return cues
         except Exception as e:
             print(f"[!] Edge-TTS attempt {attempt} failed: {e}", file=sys.stderr)
-            await asyncio.sleep(2 * attempt)
-    
-    raise RuntimeError("Edge-TTS voice generation failed after 5 attempts. Refusing distorted fallback.")
+            await asyncio.sleep(1.5)
+
+    # 2. Resilient Cloud-Native Studio Fallback: Google Gemini 2.5 Flash TTS (Charon)
+    # 100% natural, deep authoritative male voice. Never blocked on GitHub Actions or cloud IPs!
+    print("[*] Sourcing studio-grade deep male narration via Gemini 2.5 Flash TTS (Charon)...", file=sys.stderr)
+    try:
+        pcm_bytes = generate_gemini_tts(full_text, voice_name="Charon")
+        raw_pcm_file = voice_path + ".raw"
+        with open(raw_pcm_file, "wb") as pf:
+            pf.write(pcm_bytes)
+
+        subprocess.run([
+            FFMPEG_PATH, "-y",
+            "-f", "s16le", "-ar", "24000", "-ac", "1",
+            "-i", raw_pcm_file,
+            "-c:a", "libmp3lame", "-b:a", "192k",
+            voice_path
+        ], check=True, capture_output=True)
+
+        try: os.remove(raw_pcm_file)
+        except: pass
+
+        from broll_manager import get_video_duration
+        total_dur = get_video_duration(voice_path) or 20.0
+        total_chars = max(1, sum(len(line[0]) for line in lines))
+        curr_time = 0.1
+        cues = []
+        for line in lines:
+            txt = line[0]
+            fraction = len(txt) / total_chars
+            dur = max(1.2, fraction * (total_dur - 0.4))
+            cues.append((curr_time, curr_time + dur, txt))
+            curr_time += dur
+
+        print(f"[+] Studio-grade Gemini Charon male voice generated ({total_dur:.1f}s, {len(cues)} cues).", file=sys.stderr)
+        return cues
+    except Exception as e:
+        print(f"[-] Gemini TTS failed: {e}", file=sys.stderr)
+        raise RuntimeError(f"All natural human TTS engines failed: {e}")
 
 def format_ass_time(sec: float) -> str:
     h = int(sec // 3600)

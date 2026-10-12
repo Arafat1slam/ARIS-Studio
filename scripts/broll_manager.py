@@ -143,11 +143,17 @@ def get_unique_broll(segment_duration=28):
         used_offsets = used_videos.get(base_name, [])
 
         candidate_offsets = []
-        offset = 0 if dur <= (segment_duration + 8) else 3
-        while offset + segment_duration <= dur:
-            if offset not in used_offsets:
-                candidate_offsets.append(offset)
-            offset += int(segment_duration + 3)
+        if dur <= segment_duration:
+            candidate_offsets = [0]
+        else:
+            offset = 0 if dur <= (segment_duration + 8) else 3
+            while offset + segment_duration <= dur:
+                if offset not in used_offsets:
+                    candidate_offsets.append(offset)
+                offset += int(segment_duration + 3)
+            # If all unique slices were used, cycle through available offsets
+            if not candidate_offsets:
+                candidate_offsets = [0, max(0, int(dur - segment_duration) // 2)]
 
         if candidate_offsets:
             random.shuffle(candidate_offsets)

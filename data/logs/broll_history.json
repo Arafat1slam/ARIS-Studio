@@ -1,25 +1,14 @@
 {
   "used_videos": {
-    "shelby_full.mp4": [
-      0
-    ],
     "broll_sbx3cp9PFM0.mp4": [
       0,
       30,
-      5,
-      71,
-      65,
-      3
-    ],
-    "broll_pIH7XUuDXzk.mp4": [
-      71,
-      158,
-      251
+      34
     ],
     "broll_hmdBNy-zdmo.mp4": [
       0
     ]
   },
-  "query_index": 1,
+  "query_index": 0,
   "last_used_video": "broll_sbx3cp9PFM0.mp4"
 }

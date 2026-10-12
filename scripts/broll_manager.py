@@ -178,13 +178,29 @@ def get_unique_broll(segment_duration=28):
         print(f"[*] Selected freshly downloaded B-Roll: {base_name} at offset {chosen_offset}s", file=sys.stderr)
         return fresh_file, chosen_offset
 
-    # Fallback
+    # Fallback to any local file
     if local_files:
         fallback = random.choice(local_files)
         rand_off = random.randint(0, max(0, int(get_video_duration(fallback) - segment_duration)))
         return fallback, rand_off
 
-    raise RuntimeError("No b-roll clips available and could not download fresh b-roll.")
+    # Procedural fallback: Generate a sleek dark cinematic canvas so the pipeline NEVER crashes
+    fallback_path = os.path.join(BROLL_DIR, "procedural_dark_broll.mp4")
+    if not os.path.exists(fallback_path):
+        try:
+            subprocess.run([
+                FFMPEG_PATH, "-y",
+                "-f", "lavfi", "-i", "color=c=0x080a10:s=1080x1920:d=30:r=30",
+                "-vf", "noise=c1s=8:c0f=u",
+                "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                fallback_path
+            ], capture_output=True)
+        except Exception:
+            pass
+    if os.path.exists(fallback_path):
+        return fallback_path, 0
+
+    raise RuntimeError("No b-roll clips available and procedural fallback generation failed.")
 
 if __name__ == "__main__":
     b_path, b_off = get_unique_broll(28)

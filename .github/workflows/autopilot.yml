@@ -61,13 +61,17 @@ jobs:
       - name: Prepare Environment File
         env:
           ENV_CONTENT: ${{ secrets.ENV_CONTENT }}
+          INSTAGRAM_SESSION_DATA: ${{ secrets.INSTAGRAM_SESSION_DATA }}
         run: |
           python -c "import os; c = os.environ.get('ENV_CONTENT', ''); open('.env', 'w', encoding='utf-8').write(c.strip() + '\nPIPELINE_MODE=auto\nFFMPEG_PATH=ffmpeg\n') if c else print('[!] WARNING: secrets.ENV_CONTENT is empty!')"
+          python -c "import os; ig = os.environ.get('INSTAGRAM_SESSION_DATA', '').strip(); os.makedirs('config', exist_ok=True); open('config/instagram_session.json', 'w', encoding='utf-8').write(ig) if ig else None"
           python -c "import os; print('[+] .env file status: exists=' + str(os.path.exists('.env')) + ', size=' + str(os.path.getsize('.env') if os.path.exists('.env') else 0) + ' bytes')"
+          python -c "import os; print('[+] Instagram session exists: ' + str(os.path.exists('config/instagram_session.json')))"
 
       - name: Run Cloud Video Engine & Publisher
         env:
           PYTHONUNBUFFERED: "1"
+          INSTAGRAM_SESSION_DATA: ${{ secrets.INSTAGRAM_SESSION_DATA }}
         run: |
           python -u scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
 

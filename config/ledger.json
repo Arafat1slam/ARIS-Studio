@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T01:31:18.335026Z",
+  "last_updated": "2026-10-13T06:59:45.808820Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -201,6 +201,17 @@
       "youtube_id": "7SMyWnTSz_Y",
       "status": "published",
       "timestamp": "2026-10-13T01:31:18.335020Z"
+    },
+    {
+      "content_hash": "f889bd9a3c991e360b2f35a6e2ffe5ab03673781a74044ad8c5885ff68b4a1a2",
+      "video_file": "short_20261013_065552_9b742f74322b.mp4",
+      "title": "Zenitsu's God-Tier Speed! \u26a1\ufe0f You Won't Believe It! #AnimeShorts",
+      "published_at": "2026-10-13T06:59:45.808623Z",
+      "youtube_id": "6f75u9IaULM",
+      "facebook_id": "sim_fb_1791874785",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T06:59:45.808815Z"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T11:29:43.205725Z",
+  "last_updated": "2026-10-13T11:36:38.648689Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -321,6 +321,16 @@
       "youtube_id": "oYFrnwXDR_c",
       "status": "published",
       "timestamp": "2026-10-13T11:29:43.205720Z"
+    },
+    {
+      "content_hash": "362d7cf174451797d7abc4ae04c2fdb18e8912fa73ab1d1748c989249a6ed40a",
+      "video_file": "arisvexx_1791891315.mp4",
+      "title": "Master Their Minds: Dark Power! #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T11:36:38.648504Z",
+      "youtube_id": "skvi8_KQTPQ",
+      "status": "published",
+      "timestamp": "2026-10-13T11:36:38.648685Z"
     }
   ]
 }

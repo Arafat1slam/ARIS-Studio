@@ -29,27 +29,21 @@ def run_command(cmd, desc):
     return True
 
 def determine_target():
-    event_name = os.getenv("GITHUB_EVENT_NAME", "").strip().lower()
-
-    # 1. If triggered manually via GitHub Actions (workflow_dispatch)
-    if event_name == "workflow_dispatch":
-        if len(sys.argv) > 1 and sys.argv[1].lower().strip() in ("both", "--both", "all"):
-            print("[*] Manual trigger: User selected BOTH channels.", flush=True)
-            return "both"
-        print("[*] Manual trigger detected from GitHub Actions: RUNNING CHANNEL 1 (iταchι Live & Instagram) ONLY!", flush=True)
-        return "ch1"
-
-    # 2. If explicitly passed via CLI locally
+    # If explicitly passed via CLI or GitHub Actions input
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower().strip()
         if arg in ("ch1", "anime", "--ch1", "--anime"):
+            print("[*] Target explicitly set: CHANNEL 1 (iταchι Live Anime + Instagram Reels + FB)", flush=True)
             return "ch1"
-        if arg in ("ch2_force", "force_ch2", "--ch2"):
+        if arg in ("ch2", "dark", "arisvexx", "--ch2"):
+            print("[*] Target explicitly set: CHANNEL 2 (ArisVexx Dark Psychology)", flush=True)
             return "ch2"
         if arg in ("both", "--both", "all"):
+            print("[*] Target explicitly set: BOTH CHANNELS", flush=True)
             return "both"
+        # If 'auto', proceed to time-based schedule detection below
 
-    # 3. Automated Cron Schedule (Runs Channel 1 during day, Channel 2 at USA peak night)
+    # Automated Cron Schedule or 'auto' (Runs Channel 1 during day, Channel 2 at USA peak night)
     now_utc = datetime.now(timezone.utc)
     hour = now_utc.hour
     minute = now_utc.minute

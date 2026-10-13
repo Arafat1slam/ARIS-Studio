@@ -14,12 +14,14 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Target to trigger'
+        description: 'Target to run (ch1 = Anime & Instagram | ch2 = ArisVexx | auto = By Time)'
         required: true
         default: 'ch1'
         type: choice
         options:
           - ch1
+          - auto
+          - ch2
           - both
 
 permissions:

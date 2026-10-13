@@ -82,10 +82,11 @@ def main():
         print(f"    [!] Diagnostics notice: {de}", flush=True)
 
     success = True
-    if target in ("ch1", "both"):
+    # Run Channel 1 (1st YouTube & Instagram) if target is ch1, ch2, or both
+    if target in ("ch1", "ch2", "both"):
         ok = run_command(
             [sys.executable, "-u", "scripts/pipeline_orchestrator.py", "--auto"],
-            "Channel 1 (iταchι Live - Anime Short)"
+            "Channel 1 (iταchι Live - Anime Short, Instagram Reel & FB)"
         )
         success = success and ok
 

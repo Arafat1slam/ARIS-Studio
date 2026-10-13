@@ -1,6 +1,6 @@
 """
 Direct Publisher for Channel 1: iταchι Live.
-Uploads the approved Zenitsu Godspeed Short to YouTube.
+Uploads the approved Zenitsu 60FPS God-Like Speed Remaster Short to YouTube.
 On success:
 - Updates ledger.json to track published hash
 - Moves video & info.txt from 'not_uploaded/' to 'uploaded/'
@@ -11,7 +11,8 @@ import os
 import sys
 import json
 import hashlib
-from datetime import datetime
+import shutil
+from datetime import datetime, timezone
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 os.chdir(PROJECT_DIR)
@@ -25,33 +26,28 @@ except Exception:
 
 import youtube_meta_publisher
 import duplicate_checker
-import shutil
 
-def upload_zenitsu():
+def upload_zenitsu_60fps():
     not_uploaded_dir = os.path.join(PROJECT_DIR, "not_uploaded")
     uploaded_dir = os.path.join(PROJECT_DIR, "uploaded")
     os.makedirs(uploaded_dir, exist_ok=True)
 
-    # Locate Zenitsu video and caption
-    mp4_file = None
-    txt_file = None
-    for f in os.listdir(not_uploaded_dir):
-        if "Zenitsu" in f and f.endswith(".mp4"):
-            mp4_file = os.path.join(not_uploaded_dir, f)
-        elif "Zenitsu" in f and f.endswith(".txt"):
-            txt_file = os.path.join(not_uploaded_dir, f)
+    mp4_file = os.path.join(not_uploaded_dir, "[Itachi_Live] Zenitsu 60FPS God-Like Speed Remaster.mp4")
+    txt_file = os.path.join(not_uploaded_dir, "[Itachi_Live] Zenitsu 60FPS God-Like Speed Remaster_info.txt")
 
-    if not mp4_file or not os.path.exists(mp4_file):
-        print(f"[-] Zenitsu video not found in {not_uploaded_dir}")
+    if not os.path.exists(mp4_file):
+        print(f"[-] Video file not found: {mp4_file}")
         return {"success": False, "error": "Video file not found"}
 
-    title = "Zenitsu's GODSPEED is INSANE! ⚡ Demon Slayer Power-Up! #Shorts"
+    title = "Zenitsu 60FPS God-Like Speed Remaster ⚡ #Shorts"
     desc = (
-        "Witness Zenitsu unleash his terrifying Godspeed! ⚡ The speed and power are absolutely breathtaking in this iconic Demon Slayer moment.\n\n"
-        "Watch your favorite anime in high quality at: https://anime.ariswork.site\n\n"
-        "#DemonSlayer #Zenitsu #KimetsuNoYaiba #AnimeEdits #AnimeShorts #Shorts"
+        "Zenitsu reaches God-like speed in this ultra-smooth 60FPS Demon Slayer edit! ⚡\n\n"
+        "Remastered with dynamic 4K ambient spotlight framing and enhanced cinema audio.\n\n"
+        "Watch your favorite anime in high quality at: https://anime.ariswork.site\n"
+        "Subscribe to iταchι Live for daily viral anime fight scenes!\n\n"
+        "#DemonSlayer #Zenitsu #KimetsuNoYaiba #AnimeEdits #AnimeShorts #60fps #ItachiLive #Shorts"
     )
-    tags = ["DemonSlayer", "Zenitsu", "KimetsuNoYaiba", "AnimeEdits", "AnimeShorts", "Shorts"]
+    tags = ["DemonSlayer", "Zenitsu", "KimetsuNoYaiba", "AnimeEdits", "AnimeShorts", "60fps", "ItachiLive", "Shorts"]
 
     print(f"[*] Uploading Channel 1 Short: {os.path.basename(mp4_file)}...")
     print(f"[*] Title: {title}")
@@ -70,13 +66,13 @@ def upload_zenitsu():
 
     if res.get("success") and res.get("video_id") and not str(res.get("video_id")).startswith("sim_"):
         vid_id = res.get("video_id")
-        video_url = f"https://youtube.com/shorts/{vid_id}"
+        video_url = f"https://www.youtube.com/shorts/{vid_id}"
 
         with open(mp4_file, "rb") as f:
             c_hash = hashlib.sha256(f.read()).hexdigest()
 
         # 1. Update ledger
-        now_str = datetime.now().isoformat() + "Z"
+        now_str = datetime.now(timezone.utc).isoformat()
         record = {
             "content_hash": c_hash,
             "video_file": os.path.basename(mp4_file),
@@ -92,12 +88,11 @@ def upload_zenitsu():
 
         # 2. Move files from not_uploaded/ to uploaded/
         dst_mp4 = os.path.join(uploaded_dir, os.path.basename(mp4_file))
-        dst_txt = os.path.join(uploaded_dir, os.path.basename(txt_file)) if txt_file else None
+        dst_txt = os.path.join(uploaded_dir, os.path.basename(txt_file)) if os.path.exists(txt_file) else None
 
         shutil.move(mp4_file, dst_mp4)
-        if txt_file and os.path.exists(txt_file):
+        if dst_txt:
             shutil.move(txt_file, dst_txt)
-            # Update info file with live URL
             info_content = (
                 f"=================================================================\n"
                 f" CHANNEL: Itachi_Live\n"
@@ -116,14 +111,15 @@ def upload_zenitsu():
 
         return {
             "success": True,
+            "channel": "Itachi_Live",
             "video_id": vid_id,
             "video_url": video_url,
             "uploaded_file": dst_mp4
         }
     else:
-        print(f"[-] Upload failed or returned simulated ID: {res}")
+        print(f"[-] Upload failed: {res}")
         return res
 
 if __name__ == "__main__":
-    out = upload_zenitsu()
+    out = upload_zenitsu_60fps()
     print(json.dumps(out, indent=2))

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T06:59:45.808820Z",
+  "last_updated": "2026-10-13T09:58:41.258176Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -212,6 +212,59 @@
       "tiktok_id": null,
       "status": "published",
       "timestamp": "2026-10-13T06:59:45.808815Z"
+    },
+    {
+      "content_hash": "c97201dde419ceaada19587b66fbd17fef492dcb6fa82e1fbaf8b4fe2b2028eb",
+      "video_file": "[Itachi_Live] Zenitsu 60FPS God-Like Speed Remaster.mp4",
+      "title": "Zenitsu 60FPS God-Like Speed Remaster \u26a1 #Shorts",
+      "channel": "Itachi_Live",
+      "published_at": "2026-10-12T16:18:26.797730+00:00",
+      "youtube_id": "iojCtwycCR0",
+      "status": "blocked_copyright",
+      "timestamp": "2026-10-12T16:18:26.797730+00:00"
+    },
+    {
+      "content_hash": "99d647554d8752ec9bd563bf51a8c8cfca5ad3aad78b782d1a9044b7bf90fa8d",
+      "video_file": "[Itachi_Live] Zenitsu 60FPS God-Like Speed Remaster (V2 Copyright-Free).mp4",
+      "title": "Zenitsu 60FPS God-Like Speed Remaster \u26a1 #Shorts",
+      "channel": "Itachi_Live",
+      "published_at": "2026-10-12T16:29:49.403915+00:00",
+      "youtube_id": "o71s5IV1kBY",
+      "status": "published",
+      "timestamp": "2026-10-12T16:29:49.403915+00:00"
+    },
+    {
+      "content_hash": "b13b7533ce7968b18b13983d420f5eab3e00d035b92ce5f0a133239e8722a986",
+      "video_file": "short_20261013_155423_0328d6758146.mp4",
+      "title": "Levi vs. 9 Titans! \ud83d\udd25 AOT Final Part Insanity! \u2694\ufe0f #Shorts",
+      "published_at": "2026-10-13T09:55:15.083876Z",
+      "youtube_id": "EvPppFWEjOw",
+      "facebook_id": "sim_fb_1791863715",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T09:55:15.083876Z"
+    },
+    {
+      "content_hash": "a0a6a883e4e606073fe6f481c87d6fb18b361f50b270a4789f9695f394e8f49a",
+      "video_file": "short_20261013_155515_630bdb5f8f08.mp4",
+      "title": "Zenitsu's GODSPEED is INSANE! \u26a1\ufe0f\ud83d\udd25 #DemonSlayer #AnimeShorts",
+      "published_at": "2026-10-13T09:57:02.456062Z",
+      "youtube_id": "E1bbv6IVyls",
+      "facebook_id": "sim_fb_1791863822",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T09:57:02.457052Z"
+    },
+    {
+      "content_hash": "8236b3d4fbb93bfebd0e0c502ac9367ed58d8f431a7540d5ca38fb92c3cabfd6",
+      "video_file": "short_20261013_155702_9b742f74322b.mp4",
+      "title": "Zenitsu's God-Tier Speed! \u26a1\ufe0f\ud83e\udd2f Smooth 60fps Action! #AnimeShorts",
+      "published_at": "2026-10-13T09:58:41.258176Z",
+      "youtube_id": "NpkjzerZg2w",
+      "facebook_id": "sim_fb_1791863921",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T09:58:41.258176Z"
     }
   ]
 }

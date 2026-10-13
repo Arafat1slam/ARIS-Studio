@@ -6,6 +6,7 @@
 credentials.json
 client_secret*.json
 client_secrets*.json
+*session*.json
 
 # n8n local data & SQLite databases
 .n8n/

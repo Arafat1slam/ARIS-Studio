@@ -88,10 +88,17 @@ def build_adaptive_filter(width, height, clip_duration, style_index=None):
         return filter_complex, style_name
 
     # Styles for widescreen 16:9 video
-    # 0 = DARK_AMBIENT_SPOTLIGHT (The signature style of the first 2 viral uploads)
-    # 1 = CINEMATIC_OBSIDIAN_THEATER (Clean black matte theater framing)
-    # 2 = ACTION_FULLSCREEN_916 (Center crop full bleed)
+    # 0 = ACTION_FULLSCREEN_916 (Center crop full bleed - Otakusan Joyboy Style - NO black bars)
+    # 1 = DARK_AMBIENT_SPOTLIGHT (Dynamic ambient motion background - NO black bars)
     styles = [
+        (
+            "ACTION_FULLSCREEN_916",
+            (
+                "[0:v]crop=in_h*9/16:in_h:(in_w-out_w)/2:0,scale=1080:1920,"
+                "eq=contrast=1.18:saturation=1.24:brightness=-0.01,"
+                "unsharp=5:5:1.0:5:5:0.0,vignette=PI/4.6,setpts=PTS/1.04[v]"
+            )
+        ),
         (
             "DARK_AMBIENT_SPOTLIGHT",
             (
@@ -100,27 +107,11 @@ def build_adaptive_filter(width, height, clip_duration, style_index=None):
                 "[0:v]crop=in_w*0.96:in_h*0.96,scale=1080:-2,eq=contrast=1.10:saturation=1.18,unsharp=5:5:0.8[fg];"
                 "[bg][fg]overlay=(W-w)/2:(H-h)/2,vignette=PI/4.2,setpts=PTS/1.04[v]"
             )
-        ),
-        (
-            "CINEMATIC_OBSIDIAN_THEATER",
-            (
-                f"color=c=0x0a0c14:s=1080x1920:d={clip_duration:.2f}[bg];"
-                "[0:v]scale=1080:-2,eq=contrast=1.12:saturation=1.20:brightness=0.01,unsharp=5:5:0.9[fg];"
-                "[bg][fg]overlay=(W-w)/2:(H-h)/2,setpts=PTS/1.04[v]"
-            )
-        ),
-        (
-            "ACTION_FULLSCREEN_916",
-            (
-                "[0:v]crop=in_h*9/16:in_h:(in_w-out_w)/2:0,scale=1080:1920,"
-                "eq=contrast=1.15:saturation=1.24:brightness=0.01,"
-                "unsharp=5:5:1.0:5:5:0.0,vignette=PI/4.4,setpts=PTS/1.04[v]"
-            )
         )
     ]
 
     if style_index is None:
-        style_index = 0  # Default to DARK_AMBIENT_SPOTLIGHT
+        style_index = 0  # Default to ACTION_FULLSCREEN_916 (Otakusan Joyboy style)
     else:
         style_index = style_index % len(styles)
 
@@ -165,7 +156,22 @@ def generate_short(input_path, output_dir=None, max_duration=58, style_index=0):
     # Movie-theater audio enhancement: punchy bass EQ for impacts, crisp treble clarity
     audio_filters = "atempo=1.04,volume=1.08,bass=g=5:f=110,treble=g=3:f=3500"
 
-    if has_audio:
+    # Anti-copyright defense: Mix anime dialogue with trending background Phonk beats
+    if has_audio and selected_bgm:
+        print(f"[*] Applying anti-copyright Phonk BGM layer ({os.path.basename(selected_bgm)}) to anime audio...", file=sys.stderr)
+        cmd.extend([
+            "-stream_loop", "-1",
+            "-i", selected_bgm,
+            "-filter_complex", (
+                f"{filter_complex};"
+                "[0:a]volume=1.30,treble=g=3:f=3200[anime_audio];"
+                "[1:a]volume=0.22,bass=g=5:f=80[bgm_audio];"
+                "[anime_audio][bgm_audio]amix=inputs=2:duration=first:dropout_transition=2[a]"
+            ),
+            "-map", "[v]",
+            "-map", "[a]"
+        ])
+    elif has_audio:
         cmd.extend([
             "-filter_complex", filter_complex,
             "-map", "[v]",

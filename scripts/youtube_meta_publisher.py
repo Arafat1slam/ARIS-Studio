@@ -109,14 +109,58 @@ def publish_to_youtube(video_path, title, description, tags=None, privacy="publi
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
             resp_data = json.loads(resp.read().decode("utf-8"))
+            vid_id = resp_data.get("id")
+            
+            # Post official pinned comment with anime website link
+            if vid_id:
+                website_url = os.environ.get("WEBSITE_URL", "https://anime.ariswork.site")
+                pin_comment = (
+                    "🍿 Love watching Anime in Full HD?\n"
+                    f"Watch all full episodes completely free with zero ads on our official site:\n"
+                    f"👉 {website_url}"
+                )
+                add_youtube_comment(token, vid_id, pin_comment)
+
             return {
                 "success": True,
                 "platform": "youtube",
-                "video_id": resp_data.get("id"),
+                "video_id": vid_id,
                 "status": resp_data.get("status", {}).get("privacyStatus")
             }
     except Exception as e:
         return {"success": False, "platform": "youtube", "error": str(e)}
+
+def add_youtube_comment(token, video_id, comment_text):
+    if not (token and video_id and comment_text):
+        return None
+    url = "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet"
+    payload = {
+        "snippet": {
+            "videoId": video_id,
+            "topLevelComment": {
+                "snippet": {
+                    "textOriginal": comment_text
+                }
+            }
+        }
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as res:
+            res_data = json.loads(res.read().decode("utf-8"))
+            cid = res_data.get("id")
+            print(f"[+] Posted official pinned comment on YouTube video {video_id}: {cid}", file=sys.stderr)
+            return cid
+    except Exception as e:
+        print(f"[-] Could not post comment to YouTube: {e}", file=sys.stderr)
+        return None
 
 def publish_to_facebook(video_path, title, description, dry_run=False):
     """Upload video to Facebook Page via Meta Graph API."""
@@ -212,6 +256,23 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
                 print(f"[-] TikTok publish error: {e}", file=sys.stderr)
                 tt_res = {"success": False, "platform": "tiktok", "error": str(e)}
 
+    # Step 4.5: Upload to Instagram Reels (and cross-share to Facebook Page)
+    ig_res = {"success": False, "platform": "instagram", "status": "skipped"}
+    has_ig_session = os.path.exists(os.path.join(PROJECT_DIR, "config", "instagram_session.json")) or bool(os.environ.get("INSTAGRAM_SESSION_DATA")) or bool(os.environ.get("INSTAGRAM_USERNAME"))
+    if has_ig_session:
+        try:
+            import instagram_publisher
+            ig_caption = f"{title}\n\n🍿 Watch all Anime Full HD Episodes free:\n👉 https://anime.ariswork.site\n\n#anime #otaku #animereels #viral"
+            ig_res = instagram_publisher.publish_to_instagram(
+                video_path=video_path,
+                caption=ig_caption,
+                share_to_facebook=True,
+                dry_run=dry_run
+            )
+        except Exception as ige:
+            print(f"[-] Instagram publish notice: {ige}", file=sys.stderr)
+            ig_res = {"success": False, "platform": "instagram", "error": str(ige)}
+
     # Step 5: Record in ledger
     record = {
         "content_hash": content_hash,
@@ -220,6 +281,7 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
         "published_at": datetime.utcnow().isoformat() + "Z",
         "youtube_id": yt_res.get("video_id"),
         "facebook_id": fb_res.get("video_id") or fb_res.get("post_id"),
+        "instagram_id": ig_res.get("code") or ig_res.get("media_id"),
         "tiktok_id": tt_res.get("publish_id"),
         "status": "published"
     }

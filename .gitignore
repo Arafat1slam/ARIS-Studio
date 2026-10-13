@@ -32,6 +32,7 @@ data/processed_shorts/*
 !data/processed_shorts/.gitkeep
 data/approved_clips/*
 !data/approved_clips/.gitkeep
+!data/approved_clips/*.mp4
 data/broll/*
 !data/broll/.gitkeep
 !data/broll/broll_peaky4k.mp4

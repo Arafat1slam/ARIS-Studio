@@ -41,27 +41,37 @@ def determine_target():
         if arg in ("both", "--both", "all"):
             print("[*] Target explicitly set: BOTH CHANNELS", flush=True)
             return "both"
-        # If 'auto', proceed to time-based schedule detection below
+        # If 'auto', proceed to schedule detection below
 
-    # Automated Cron Schedule or 'auto' (Runs Channel 1 during day, Channel 2 at USA peak night)
+    # Check if triggered by GitHub Actions cron schedule
+    sched_cron = os.getenv("GITHUB_EVENT_SCHEDULE", "").strip()
+    if sched_cron:
+        ch1_crons = {"30 7 * * *", "32 7 * * *", "30 12 * * *", "32 12 * * *", "30 15 * * *", "32 15 * * *"}
+        ch2_crons = {"00 16 * * *", "03 16 * * *", "30 19 * * *", "33 19 * * *", "30 0 * * *", "32 0 * * *"}
+        if sched_cron in ch1_crons:
+            print(f"[*] Triggered by Channel 1 Scheduled Cron: '{sched_cron}'", flush=True)
+            return "ch1"
+        if sched_cron in ch2_crons:
+            print(f"[*] Triggered by Channel 2 Scheduled Cron: '{sched_cron}'", flush=True)
+            return "ch2"
+
+    # Automated Schedule or 'auto' based on UTC/BST Time brackets:
+    # Channel 1 (Anime + Instagram): 06:00 UTC to 15:45 UTC (12:00 PM to 09:45 PM BST)
+    # Channel 2 (ArisVexx): 15:45 UTC to 05:59 UTC (09:45 PM to 11:59 AM BST)
     now_utc = datetime.now(timezone.utc)
     hour = now_utc.hour
     minute = now_utc.minute
     total_minutes = hour * 60 + minute
 
-    print(f"[*] Cloud Scheduled Slot at UTC {now_utc.strftime('%H:%M')} (BST {((hour+6)%24):02d}:{minute:02d})", flush=True)
+    bst_hour = (hour + 6) % 24
+    print(f"[*] Cloud Slot Detection at UTC {now_utc.strftime('%H:%M')} (BST {bst_hour:02d}:{minute:02d})", flush=True)
 
-    # Channel 1: 07:30 UTC (450m), 12:30 UTC (750m), 15:30 UTC (930m)
-    # Channel 2: 16:00 UTC (960m), 19:30 UTC (1170m), 00:30 UTC (30m)
-    ch1_slots = [450, 750, 930]
-    ch2_slots = [30, 960, 1170]
-
-    min_dist_ch1 = min(abs(total_minutes - s) for s in ch1_slots)
-    min_dist_ch2 = min(abs(total_minutes - s) for s in ch2_slots)
-
-    if min_dist_ch1 < min_dist_ch2:
+    # 06:00 UTC = 360m, 15:45 UTC = 945m
+    if 360 <= total_minutes < 945:
+        print("[*] Current slot falls inside Channel 1 window (Day/Evening BST)", flush=True)
         return "ch1"
     else:
+        print("[*] Current slot falls inside Channel 2 window (USA Prime Night/Bedtime)", flush=True)
         return "ch2"
 
 def main():

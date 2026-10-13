@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T11:13:43.708331Z",
+  "last_updated": "2026-10-13T11:21:05.419744Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -297,6 +297,20 @@
       "youtube_id": "1JbtAfwNZFw",
       "status": "published",
       "timestamp": "2026-10-13T11:13:43.708327Z"
+    },
+    {
+      "content_hash": "3c8525ef2a9eaae73a319bbf4be566a25b77046fdfbe3bb6f84268d650a301b8",
+      "source_file": "NEON BLADE - CHAINSAW MAN \uff5c\uff5c DENJI { EDIT } \uff5c\uff5c ROY_FhI0eoWkB68.mp4",
+      "source_hash": "0b022632d0dce3ded00eaa3752457ac7f373d94322615d0d23425f3d1c824961",
+      "video_file": "short_20261013_171929_9d66381aa0b1.mp4",
+      "title": "Denji's NEON BLADE Edit! \ud83d\udd25\u26d3\ufe0f Chainsaw Man Power! #Shorts",
+      "published_at": "2026-10-13T11:21:05.419233Z",
+      "youtube_id": "1dvvdcp12Hs",
+      "facebook_id": "sim_fb_1791868808",
+      "instagram_id": "Debr_IWTAcy",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T11:21:05.419744Z"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T17:24:10.323329Z",
+  "last_updated": "2026-10-13T17:30:56.190432Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -345,6 +345,16 @@
       "tiktok_id": null,
       "status": "published",
       "timestamp": "2026-10-13T17:24:10.323324Z"
+    },
+    {
+      "content_hash": "af80203dd0e3bedf384257cb4b2e867d24b2ea78bc53b4fbaa06be3c0294a98f",
+      "video_file": "arisvexx_1791912590.mp4",
+      "title": "Unlock Their Mind: Dark Psychology Secrets #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T17:30:56.190235Z",
+      "youtube_id": "jMLH3dYr_bo",
+      "status": "published",
+      "timestamp": "2026-10-13T17:30:56.190428Z"
     }
   ]
 }

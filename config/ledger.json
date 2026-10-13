@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T10:55:59.870388Z",
+  "last_updated": "2026-10-13T11:13:43.708331Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -287,6 +287,16 @@
       "youtube_id": "3DZVvgMV89o",
       "status": "published",
       "timestamp": "2026-10-13T10:55:59.870383Z"
+    },
+    {
+      "content_hash": "e974bade102bb21bc12aae60d152739bfdabefc7dd1dc2c65cec4d9d61e7f9ac",
+      "video_file": "arisvexx_1791889941.mp4",
+      "title": "Master The Unseen Hand #DarkPsychology #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T11:13:43.708149Z",
+      "youtube_id": "1JbtAfwNZFw",
+      "status": "published",
+      "timestamp": "2026-10-13T11:13:43.708327Z"
     }
   ]
 }

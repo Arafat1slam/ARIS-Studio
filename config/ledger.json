@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T11:36:38.648689Z",
+  "last_updated": "2026-10-13T17:24:10.323329Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -331,6 +331,20 @@
       "youtube_id": "skvi8_KQTPQ",
       "status": "published",
       "timestamp": "2026-10-13T11:36:38.648685Z"
+    },
+    {
+      "content_hash": "ead97d640182feb80bbaefae2e685c131a69c2bba15867890b017583af1e5b02",
+      "source_file": "solo_leveling_jinwoo_4k.mp4",
+      "source_hash": "c8af59e4bc5a21f3244fb36d056c2900a13db268eb6e59e68f8ce12ea0d65bee",
+      "video_file": "short_20261013_172128_9d295d92afd0.mp4",
+      "title": "Sung Jinwoo's Power Unleashed! \ud83d\udd25 Solo Leveling 4K #Shorts",
+      "published_at": "2026-10-13T17:24:10.323073Z",
+      "youtube_id": "IHW9bBivXBM",
+      "facebook_id": "sim_fb_1791912202",
+      "instagram_id": "DecVi9oz71w",
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T17:24:10.323324Z"
     }
   ]
 }

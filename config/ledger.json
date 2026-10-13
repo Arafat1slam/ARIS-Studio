@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T09:58:41.258176Z",
+  "last_updated": "2026-10-13T10:55:59.870388Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -265,6 +265,28 @@
       "tiktok_id": null,
       "status": "published",
       "timestamp": "2026-10-13T09:58:41.258176Z"
+    },
+    {
+      "content_hash": "a4c1d7e3ec454dcbe5bc5a3807738301168b7ba1c2cc5f9bc85cf5098e8eb1f3",
+      "video_file": "short_20261013_105136_378ee50fba6f.mp4",
+      "title": "Zenitsu's God-Tier Speed! \u26a1\ufe0f You Won't Believe It! #AnimeShorts",
+      "published_at": "2026-10-13T10:54:53.197764Z",
+      "youtube_id": "Tp9ziOSVTkY",
+      "facebook_id": "sim_fb_1791888885",
+      "instagram_id": null,
+      "tiktok_id": null,
+      "status": "published",
+      "timestamp": "2026-10-13T10:54:53.197894Z"
+    },
+    {
+      "content_hash": "68c006fceab520b2f8b88608938311c7543a4a914d097908a9ded7f3aba01710",
+      "video_file": "arisvexx_1791888893.mp4",
+      "title": "Never Reveal Your True Plans | Stoic Rule",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T10:55:59.870195Z",
+      "youtube_id": "3DZVvgMV89o",
+      "status": "published",
+      "timestamp": "2026-10-13T10:55:59.870383Z"
     }
   ]
 }

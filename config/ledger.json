@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-12T22:39:46.641910Z",
+  "last_updated": "2026-10-13T01:31:18.335026Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -191,6 +191,16 @@
       "youtube_id": null,
       "status": "published",
       "timestamp": "2026-10-12T22:39:46.641904Z"
+    },
+    {
+      "content_hash": "dd2dbb5b2225b302651c0303e6bc742c4f211e9bbcac2c8858f4e168016b0103",
+      "video_file": "arisvexx_1791854979.mp4",
+      "title": "MIND CONTROL: Unmask Their Weakness #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T01:31:18.334865Z",
+      "youtube_id": "7SMyWnTSz_Y",
+      "status": "published",
+      "timestamp": "2026-10-13T01:31:18.335020Z"
     }
   ]
 }

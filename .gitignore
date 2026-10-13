@@ -33,6 +33,8 @@ data/processed_shorts/*
 data/custom_edits/*
 !data/custom_edits/.gitkeep
 dist/
+!frontend/dist/
+!frontend/dist/**
 build/
 *.spec
 data/approved_clips/*

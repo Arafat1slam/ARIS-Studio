@@ -30,6 +30,11 @@ env/
 # Data and Generated Video files (large binaries)
 data/processed_shorts/*
 !data/processed_shorts/.gitkeep
+data/custom_edits/*
+!data/custom_edits/.gitkeep
+dist/
+build/
+*.spec
 data/approved_clips/*
 !data/approved_clips/.gitkeep
 !data/approved_clips/*.mp4

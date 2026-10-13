@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-13T11:21:05.419744Z",
+  "last_updated": "2026-10-13T11:29:43.205725Z",
   "records": [
     {
       "content_hash": "285235d9e6670be2f336091a839dccf8097d59732bb73e1c412f2919d8936e24",
@@ -311,6 +311,16 @@
       "tiktok_id": null,
       "status": "published",
       "timestamp": "2026-10-13T11:21:05.419744Z"
+    },
+    {
+      "content_hash": "a5785b25dbaa0f0dbe833cfa142fb8d04aeacb15fb1b77979861f2228145b406",
+      "video_file": "arisvexx_1791890904.mp4",
+      "title": "They'll Never Suspect #Shorts",
+      "channel": "ArisVexx",
+      "published_at": "2026-10-13T11:29:43.205528Z",
+      "youtube_id": "oYFrnwXDR_c",
+      "status": "published",
+      "timestamp": "2026-10-13T11:29:43.205720Z"
     }
   ]
 }

@@ -14,14 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Target to trigger (ch1 = 1st YouTube + Instagram ONLY | auto = Follow Schedule)'
+        description: 'Target to trigger'
         required: true
         default: 'ch1'
         type: choice
         options:
           - ch1
-          - auto
-          - ch2
           - both
 
 permissions:
@@ -72,6 +70,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           INSTAGRAM_SESSION_DATA: ${{ secrets.INSTAGRAM_SESSION_DATA }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
           python -u scripts/run_cloud_slot.py ${{ github.event.inputs.target || 'auto' }}
 

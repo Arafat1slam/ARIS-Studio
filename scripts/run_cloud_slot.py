@@ -29,28 +29,36 @@ def run_command(cmd, desc):
     return True
 
 def determine_target():
-    # If explicitly passed via CLI
+    event_name = os.getenv("GITHUB_EVENT_NAME", "").strip().lower()
+
+    # 1. If triggered manually via GitHub Actions (workflow_dispatch)
+    if event_name == "workflow_dispatch":
+        if len(sys.argv) > 1 and sys.argv[1].lower().strip() in ("both", "--both", "all"):
+            print("[*] Manual trigger: User selected BOTH channels.", flush=True)
+            return "both"
+        print("[*] Manual trigger detected from GitHub Actions: RUNNING CHANNEL 1 (iταchι Live & Instagram) ONLY!", flush=True)
+        return "ch1"
+
+    # 2. If explicitly passed via CLI locally
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower().strip()
         if arg in ("ch1", "anime", "--ch1", "--anime"):
             return "ch1"
-        if arg in ("ch2", "dark", "arisvexx", "--ch2"):
+        if arg in ("ch2_force", "force_ch2", "--ch2"):
             return "ch2"
         if arg in ("both", "--both", "all"):
             return "both"
 
-    # Otherwise detect based on UTC time (BST is UTC + 6 hours)
+    # 3. Automated Cron Schedule (Runs Channel 1 during day, Channel 2 at USA peak night)
     now_utc = datetime.now(timezone.utc)
     hour = now_utc.hour
     minute = now_utc.minute
     total_minutes = hour * 60 + minute
 
-    print(f"[*] Cloud Slot Triggered at UTC {now_utc.strftime('%H:%M')} (BST {((hour+6)%24):02d}:{minute:02d})", flush=True)
+    print(f"[*] Cloud Scheduled Slot at UTC {now_utc.strftime('%H:%M')} (BST {((hour+6)%24):02d}:{minute:02d})", flush=True)
 
-    # Time windows matching schedule (allowing +/- 20 min buffer for GitHub cron delay)
     # Channel 1: 07:30 UTC (450m), 12:30 UTC (750m), 15:30 UTC (930m)
     # Channel 2: 16:00 UTC (960m), 19:30 UTC (1170m), 00:30 UTC (30m)
-
     ch1_slots = [450, 750, 930]
     ch2_slots = [30, 960, 1170]
 

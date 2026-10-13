@@ -74,15 +74,39 @@ def publish_to_instagram(video_path: str, caption: str, share_to_facebook: bool 
     try:
         cl = get_instagram_client()
         uname = cl.username or os.getenv("INSTAGRAM_USERNAME") or "rneitachi"
-        print(f"[*] Connected to Instagram as @{uname} (ID: {cl.user_id})", file=sys.stderr)
-        print(f"[*] Uploading Reel ({os.path.getsize(video_path)/(1024*1024):.2f} MB) with auto FB share={share_to_facebook}...", file=sys.stderr)
-        
-        media = cl.clip_upload(
-            path=Path(video_path),
-            caption=caption,
-            share_to_facebook=share_to_facebook
-        )
-        
+        thumb_path = f"{video_path}.jpg"
+        if not os.path.exists(thumb_path):
+            try:
+                import shutil
+                import subprocess
+                ffmpeg_bin = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
+                if not os.path.exists(ffmpeg_bin):
+                    ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
+                subprocess.run(
+                    [ffmpeg_bin, "-y", "-ss", "00:00:01", "-i", video_path, "-vframes", "1", "-q:v", "2", thumb_path],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10
+                )
+            except Exception:
+                pass
+
+        thumb_arg = Path(thumb_path) if os.path.exists(thumb_path) else None
+
+        # Upload Reel to Instagram
+        print(f"[*] Uploading Reel ({os.path.getsize(video_path)/(1024*1024):.2f} MB)...", file=sys.stderr)
+        try:
+            if share_to_facebook:
+                try:
+                    media = cl.clip_upload(path=Path(video_path), caption=caption, thumbnail=thumb_arg, share_to_facebook=True)
+                except Exception as fb_err:
+                    print(f"[*] FB cross-post preflight skipped ({fb_err}). Uploading directly to Instagram...", file=sys.stderr)
+                    media = cl.clip_upload(path=Path(video_path), caption=caption, thumbnail=thumb_arg, share_to_facebook=False)
+            else:
+                media = cl.clip_upload(path=Path(video_path), caption=caption, thumbnail=thumb_arg, share_to_facebook=False)
+        finally:
+            if thumb_path and os.path.exists(thumb_path):
+                try: os.remove(thumb_path)
+                except Exception: pass
+
         reel_url = f"https://www.instagram.com/reel/{media.code}/"
         print(f"[+] Successfully published to Instagram! Reel URL: {reel_url}", file=sys.stderr)
 

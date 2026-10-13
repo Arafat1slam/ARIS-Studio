@@ -212,7 +212,7 @@ def publish_to_facebook(video_path, title, description, dry_run=False):
     except Exception as e:
         return {"success": False, "platform": "facebook", "error": str(e)}
 
-def publish_content(video_path, content_hash, title, description, tags=None, dry_run=False):
+def publish_content(video_path, content_hash, title, description, tags=None, dry_run=False, source_file=None, source_hash=None):
     """
     Publish to all enabled platforms and update ledger.
     """
@@ -220,6 +220,11 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
 
     # Step 1: Duplicate check
     is_dup, rec = duplicate_checker.is_duplicate(content_hash)
+    if not is_dup and source_hash:
+        is_dup, rec = duplicate_checker.is_duplicate(source_hash)
+    if not is_dup and source_file:
+        is_dup, rec = duplicate_checker.is_duplicate(source_file)
+
     if is_dup:
         return {
             "success": False,
@@ -256,7 +261,7 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
                 print(f"[-] TikTok publish error: {e}", file=sys.stderr)
                 tt_res = {"success": False, "platform": "tiktok", "error": str(e)}
 
-    # Step 4.5: Upload to Instagram Reels (and cross-share to Facebook Page)
+    # Step 4.5: Upload to Instagram Reels
     ig_res = {"success": False, "platform": "instagram", "status": "skipped"}
     has_ig_session = os.path.exists(os.path.join(PROJECT_DIR, "config", "instagram_session.json")) or bool(os.environ.get("INSTAGRAM_SESSION_DATA")) or bool(os.environ.get("INSTAGRAM_USERNAME"))
     if has_ig_session:
@@ -266,7 +271,7 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
             ig_res = instagram_publisher.publish_to_instagram(
                 video_path=video_path,
                 caption=ig_caption,
-                share_to_facebook=True,
+                share_to_facebook=False,
                 dry_run=dry_run
             )
         except Exception as ige:
@@ -276,6 +281,8 @@ def publish_content(video_path, content_hash, title, description, tags=None, dry
     # Step 5: Record in ledger
     record = {
         "content_hash": content_hash,
+        "source_file": source_file,
+        "source_hash": source_hash,
         "video_file": os.path.basename(video_path),
         "title": title,
         "published_at": datetime.utcnow().isoformat() + "Z",

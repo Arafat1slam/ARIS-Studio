@@ -38,12 +38,40 @@ def save_ledger(data, ledger_path=DEFAULT_LEDGER_PATH):
     with open(ledger_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
-def is_duplicate(content_hash, ledger_path=DEFAULT_LEDGER_PATH):
-    """Check if content_hash already exists in the ledger."""
+def is_duplicate(identifier, ledger_path=DEFAULT_LEDGER_PATH):
+    """
+    Check if identifier (content_hash, source_hash, filename, or anime keyword) exists in the ledger.
+    """
+    if not identifier:
+        return False, None
     ledger = load_ledger(ledger_path)
+    clean_id = os.path.basename(str(identifier)).lower().strip()
+    import re
+
+    # Extract distinctive words (>4 chars) from filename/identifier
+    stem = os.path.splitext(clean_id)[0]
+    ignore_words = {'video', 'short', 'shorts', 'speed', 'anime', 'edits', 'remaster', '1080p', '60fps', 'final', 'part', 'scene', 'fight', 'action'}
+    dist_words = [w.lower() for w in re.split(r'[^a-zA-Z0-9]', stem) if len(w) > 4 and w.lower() not in ignore_words]
+
     for record in ledger.get("records", []):
-        if record.get("content_hash") == content_hash:
+        # 1. Exact hash match
+        if record.get("content_hash") == identifier or record.get("source_hash") == identifier:
             return True, record
+
+        # 2. Source file match
+        rec_src = os.path.basename(str(record.get("source_file", ""))).lower().strip()
+        if rec_src and rec_src == clean_id:
+            return True, record
+
+        rec_vid = os.path.basename(str(record.get("video_file", ""))).lower().strip()
+        if rec_vid and rec_vid == clean_id:
+            return True, record
+
+        # 3. Content semantic keyword match (prevents re-posting same anime character/scene)
+        rec_title = str(record.get("title", "")).lower()
+        if dist_words and any(w in rec_title or w in rec_vid for w in dist_words):
+            return True, record
+
     return False, None
 
 def add_record(record_data, ledger_path=DEFAULT_LEDGER_PATH):

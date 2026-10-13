@@ -22,6 +22,7 @@ sys.path.append(os.path.join(PROJECT_DIR, "scripts"))
 
 import custom_ai_editor
 import aftereffects_bridge
+import copyright_remover
 
 PORT = 8585
 FRONTEND_DIST = os.path.join(PROJECT_DIR, "frontend", "dist")
@@ -39,6 +40,7 @@ def get_system_status():
     approved_clips = [os.path.basename(f) for f in glob.glob(os.path.join(PROJECT_DIR, "data", "approved_clips", "*.mp4"))]
     broll_clips = [os.path.basename(f) for f in glob.glob(os.path.join(PROJECT_DIR, "data", "broll", "*.mp4"))]
     custom_edits = [os.path.basename(f) for f in glob.glob(os.path.join(PROJECT_DIR, "data", "custom_edits", "*.mp4"))]
+    clean_clips = [os.path.basename(f) for f in glob.glob(os.path.join(PROJECT_DIR, "data", "copyright_free", "*.mp4"))]
 
     return {
         "status": "online",
@@ -47,7 +49,8 @@ def get_system_status():
         "recent_records": ledger_records[-15:],
         "approved_clips": approved_clips,
         "broll_clips": broll_clips,
-        "custom_edits": custom_edits
+        "custom_edits": custom_edits,
+        "clean_clips": clean_clips
     }
 
 class StudioRequestHandler(BaseHTTPRequestHandler):
@@ -88,6 +91,7 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         if path.startswith("/video/"):
             filename = os.path.basename(path)
             candidates = [
+                os.path.join(PROJECT_DIR, "data", "copyright_free", filename),
                 os.path.join(PROJECT_DIR, "data", "custom_edits", filename),
                 os.path.join(PROJECT_DIR, "data", "approved_clips", filename),
                 os.path.join(PROJECT_DIR, "data", "broll", filename)
@@ -138,8 +142,14 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
-        data = json.loads(body) if body else {}
+        body = self.rfile.read(length).decode("utf-8", errors="replace") if length > 0 else "{}"
+        try:
+            data = json.loads(body) if body else {}
+        except Exception:
+            try:
+                data = json.loads(body.replace("\\", "\\\\"))
+            except Exception:
+                data = {}
 
         # API: Custom AI Video Edit
         if path == "/api/custom_edit":
@@ -200,6 +210,88 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"success": proc.returncode == 0, "output": proc.stdout}).encode("utf-8"))
             return
+
+        # API: Copyright Risk Analysis
+        if path == "/api/copyright/analyze":
+            video_path = data.get("video_path", "").strip()
+            if not video_path:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "No video path or URL provided"}).encode("utf-8"))
+                return
+
+            is_url = video_path.startswith("http://") or video_path.startswith("https://")
+            if not is_url:
+                if not os.path.isabs(video_path):
+                    video_path = os.path.join(PROJECT_DIR, video_path)
+                if not os.path.exists(video_path):
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": f"File not found: {video_path}"}).encode("utf-8"))
+                    return
+
+            try:
+                res = copyright_remover.analyze_copyright_risks(video_path)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+                return
+
+        # API: Copyright Neutralization & Watermarking
+        if path == "/api/copyright/process":
+            video_path = data.get("video_path", "").strip()
+            if not video_path:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "No video path or URL provided"}).encode("utf-8"))
+                return
+
+            is_url = video_path.startswith("http://") or video_path.startswith("https://")
+            if not is_url:
+                if not os.path.isabs(video_path):
+                    video_path = os.path.join(PROJECT_DIR, video_path)
+                if not os.path.exists(video_path):
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": f"File not found: {video_path}"}).encode("utf-8"))
+                    return
+
+            watermark_text = (data.get("watermark") or data.get("watermark_text") or "ARIS").strip() or "ARIS"
+            mode = data.get("mode", "9:16_short")
+            tempo = float(data.get("tempo", 1.04))
+
+            try:
+                res = copyright_remover.process_copyright_removal(video_path, watermark_text, mode, tempo)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+                return
 
         self.send_response(404)
         self.end_headers()

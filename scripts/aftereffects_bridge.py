@@ -1,16 +1,18 @@
 """
 ARIS After Effects Bridge & AI ExtendScript Automation Engine
-Integrates features inspired by aftereffects-mcp:
-1. Direct connection to running Adobe After Effects instance via CEP Bridge (port 7788).
-2. AI-driven ExtendScript (.jsx) generation from natural language prompts.
-3. Automated Comp creation (9:16 vertical shorts, 16:9 4K, 1:1 square).
-4. Keyframing, text animation, easing presets, and aerender exports.
+Directly integrated with solomondivyananth/aftereffects-mcp:
+1. Local repository at tools/aftereffects-mcp
+2. CEP Bridge panel linked to %APPDATA%/Adobe/CEP/extensions/com.aemcpbridge
+3. Direct bidirectional RPC to running Adobe After Effects instance via CEP Bridge (port 7788)
+4. AI-driven ExtendScript (.jsx) generation & live execution
+5. Automated Comp creation (9:16 vertical shorts, 16:9 widescreen, 1:1 square)
 """
 
 import os
 import sys
 import json
 import glob
+import subprocess
 import urllib.request
 import urllib.error
 from datetime import datetime
@@ -19,6 +21,7 @@ PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ENV_FILE = os.path.join(PROJECT_DIR, ".env")
 AE_SCRIPTS_DIR = os.path.join(PROJECT_DIR, "data", "ae_scripts")
 AE_PREVIEWS_DIR = os.path.join(PROJECT_DIR, "data", "ae_previews")
+AE_MCP_DIR = os.path.join(PROJECT_DIR, "aftereffects-mcp") if os.path.exists(os.path.join(PROJECT_DIR, "aftereffects-mcp")) else os.path.join(PROJECT_DIR, "tools", "aftereffects-mcp")
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = int(os.environ.get("AE_BRIDGE_PORT", 7788))
@@ -48,44 +51,77 @@ def get_bridge_token():
             pass
     return ""
 
+def is_panel_installed():
+    """Check if the CEP extension com.aemcpbridge is linked in AppData."""
+    appdata = os.environ.get("APPDATA", os.path.join(os.path.expanduser("~"), "AppData", "Roaming"))
+    ext_path = os.path.join(appdata, "Adobe", "CEP", "extensions", "com.aemcpbridge")
+    return os.path.exists(ext_path)
+
+def install_or_link_panel():
+    """Runs bin/install-panel.js --link from tools/aftereffects-mcp."""
+    install_script = os.path.join(AE_MCP_DIR, "bin", "install-panel.js")
+    if os.path.exists(install_script):
+        try:
+            res = subprocess.run(["node", install_script, "--link"], cwd=AE_MCP_DIR, capture_output=True, text=True)
+            return {"success": res.returncode == 0, "output": res.stdout}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    return {"success": False, "error": "install-panel.js not found"}
+
 def find_after_effects_exe():
     """Look for AfterFX.exe or aerender.exe on Windows."""
-    candidates = glob.glob(r"C:\Program Files\Adobe\Adobe After Effects*\Support Files\AfterFX.exe")
+    candidates = glob.glob(r"C:\Program Files\Adobe\Adobe After Effects*\Support Files\AfterFX.exe") + \
+                 glob.glob(r"D:\*\Adobe\Adobe After Effects*\Support Files\AfterFX.exe")
     if candidates:
         return candidates[0]
     return None
 
-def check_bridge_connection():
-    """Check if the AE MCP Bridge CEP panel is open and listening."""
+def execute_bridge_call(fn, args=None):
+    """Execute any tool call on the live After Effects CEP Bridge (Port 7788)."""
     token = get_bridge_token()
     url = f"http://{DEFAULT_HOST}:{DEFAULT_PORT}/call"
-    test_body = json.dumps({"fn": "project_info", "args": {}}).encode("utf-8")
-    
+    body = json.dumps({"fn": fn, "args": args or {}}).encode("utf-8")
     headers = {
         "Content-Type": "application/json",
         "X-AE-Bridge-Token": token or "test"
     }
-
-    req = urllib.request.Request(url, data=test_body, headers=headers, method="POST")
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=1.5) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            return {
-                "online": True,
-                "port": DEFAULT_PORT,
-                "project_info": data.get("result", {}),
-                "token_configured": bool(token)
-            }
+            return {"ok": True, "data": data}
     except Exception as e:
-        ae_exe = find_after_effects_exe()
+        return {"ok": False, "error": str(e)}
+
+def check_bridge_connection():
+    """Check if the AE MCP Bridge CEP panel is open and listening."""
+    token = get_bridge_token()
+    panel_installed = is_panel_installed()
+    mcp_present = os.path.exists(AE_MCP_DIR)
+    
+    bridge_res = execute_bridge_call("project_info", {})
+    if bridge_res.get("ok"):
         return {
-            "online": False,
+            "online": True,
             "port": DEFAULT_PORT,
-            "error": str(e),
-            "ae_installed": bool(ae_exe),
-            "ae_path": ae_exe or "Not found in standard Adobe directory",
-            "message": "After Effects is not currently running with the AE MCP Bridge panel open. ExtendScript (.jsx) generator will operate in standalone file mode."
+            "mcp_repo_present": mcp_present,
+            "panel_installed": panel_installed,
+            "project_info": bridge_res["data"].get("result", {}),
+            "token_configured": bool(token),
+            "message": "After Effects MCP Bridge is actively connected on port 7788!"
         }
+    
+    ae_exe = find_after_effects_exe()
+    return {
+        "online": False,
+        "port": DEFAULT_PORT,
+        "mcp_repo_present": mcp_present,
+        "panel_installed": panel_installed,
+        "error": bridge_res.get("error"),
+        "ae_installed": bool(ae_exe),
+        "ae_path": ae_exe or "Not found in standard Adobe directory",
+        "message": "Extension com.aemcpbridge is installed in Adobe CEP. Launch After Effects and go to: Window > Extensions > AE MCP Bridge to start live bridge."
+    }
 
 def generate_extendscript_with_ai(prompt, comp_type="9:16"):
     """
@@ -199,17 +235,12 @@ def save_and_dispatch_jsx(jsx_code, comp_name="ARIS_Comp"):
     bridge_result = None
 
     if bridge_status.get("online"):
-        token = get_bridge_token()
-        url = f"http://{DEFAULT_HOST}:{DEFAULT_PORT}/call"
-        body = json.dumps({"fn": "run_jsx", "args": {"code": jsx_code}}).encode("utf-8")
-        headers = {"Content-Type": "application/json", "X-AE-Bridge-Token": token}
-        try:
-            req = urllib.request.Request(url, data=body, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                bridge_result = json.loads(resp.read().decode("utf-8"))
-                dispatched = True
-        except Exception as be:
-            bridge_result = {"error": str(be)}
+        run_res = execute_bridge_call("run_jsx", {"code": jsx_code})
+        if run_res.get("ok"):
+            bridge_result = run_res["data"]
+            dispatched = True
+        else:
+            bridge_result = run_res
 
     return {
         "success": True,
@@ -224,6 +255,3 @@ def save_and_dispatch_jsx(jsx_code, comp_name="ARIS_Comp"):
 if __name__ == "__main__":
     status = check_bridge_connection()
     print("Bridge Status:", json.dumps(status, indent=2))
-    plan = generate_extendscript_with_ai("Make 9:16 dark psychology kinetic typography intro", "9:16")
-    res = save_and_dispatch_jsx(plan["jsx_code"])
-    print("Result:", json.dumps(res, indent=2))

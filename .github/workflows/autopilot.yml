@@ -14,13 +14,13 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Target Channel to trigger'
+        description: 'Target to trigger (ch1 = 1st YouTube + Instagram ONLY | auto = Follow Schedule)'
         required: true
-        default: 'auto'
+        default: 'ch1'
         type: choice
         options:
-          - auto
           - ch1
+          - auto
           - ch2
           - both
 

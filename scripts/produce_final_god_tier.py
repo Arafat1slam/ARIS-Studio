@@ -25,6 +25,8 @@ sys.path.append(os.path.join(PROJECT_DIR, "scripts"))
 
 import quality_control
 import edge_tts
+import premiere_automation
+import aftereffects_bridge
 
 FFMPEG = r"tools\ffmpeg.exe" if os.path.exists(r"tools\ffmpeg.exe") else "ffmpeg"
 BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll", "scenepacks")
@@ -140,6 +142,13 @@ def produce_akaza_crimson_moon_amv():
     ]
     subprocess.run(cmd_master, check=True, capture_output=True)
     print(f"[OK] Master Rendered: {os.path.basename(out_file)} ({os.path.getsize(out_file)/(1024*1024):.2f} MB)")
+
+    # Generate Premiere Pro & After Effects Pro Suite
+    ppro_res = premiere_automation.build_pro_editing_package(selected_clips, bgm_path=phonk_mastered, title="Akaza_CrimsonMoon_AMV")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(selected_clips, words=["CRIMSON", "MOON", "UPPER", "THREE", "AKAZA"], bgm_path=phonk_mastered, title="Akaza_CrimsonMoon_AMV")
+    print(f"🎬 Premiere Pro XML: {ppro_res['xml']['xml_path']}")
+    print(f"🎬 Premiere Pro JSX: {ppro_res['jsx']['script_path']}")
+    print(f"🎬 After Effects JSX: {ae_res['file_path']}")
 
     # Copy directly to Downloads
     dst = os.path.join(DOWNLOADS_DIR, "Channel1_Viral_Anime_Short.mp4")
@@ -288,6 +297,13 @@ Dialogue: 0,0:00:00.00,0:{int(total_dur//60):02d}:{total_dur%60:05.2f},Badge,,0,
     ]
     subprocess.run(cmd_master, check=True, capture_output=True)
     print(f"[OK] Master Rendered: {os.path.basename(out_file)} ({os.path.getsize(out_file)/(1024*1024):.2f} MB)")
+
+    # Generate Premiere Pro & After Effects Pro Suite
+    ppro_res = premiere_automation.build_pro_editing_package(fc_clips, voiceover_path=vo_path, bgm_path=bgm_path, title="FightClub_Dark_Psychology")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(fc_clips, words=["NEVER", "REACT", "MASTER", "YOUR", "EMOTIONS"], bgm_path=bgm_path, title="FightClub_Dark_Psychology")
+    print(f"🎬 Premiere Pro XML: {ppro_res['xml']['xml_path']}")
+    print(f"🎬 Premiere Pro JSX: {ppro_res['jsx']['script_path']}")
+    print(f"🎬 After Effects JSX: {ae_res['file_path']}")
 
     # Copy directly to Downloads
     dst = os.path.join(DOWNLOADS_DIR, "Channel2_Dark_Psychology_Short.mp4")

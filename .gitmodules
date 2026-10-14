@@ -1,0 +1,3 @@
+[submodule "aftereffects-mcp"]
+	path = aftereffects-mcp
+	url = https://github.com/solomondivyananth/aftereffects-mcp.git

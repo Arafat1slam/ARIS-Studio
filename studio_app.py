@@ -92,6 +92,16 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(status).encode("utf-8"))
             return
 
+        # 2.05 API: After Effects Templates List
+        if path == "/api/ae/templates":
+            templates = aftereffects_bridge.list_available_templates()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(templates).encode("utf-8"))
+            return
+
         # 2.1 API: AnimeClips.online Titles List
         if path == "/api/animeclips/titles":
             titles = animeclips_fetcher.get_all_titles()
@@ -383,13 +393,12 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             title = data.get("title", "ARIS AI Short")
             vo_path = data.get("voiceover_path")
             bgm_path = data.get("bgm_path")
-            xml_res = premiere_automation.generate_fcp_xml_sequence(clip_paths, voiceover_path=vo_path, bgm_path=bgm_path, title=title)
-            jsx_res = premiere_automation.generate_premiere_extendscript(clip_paths, voiceover_path=vo_path, bgm_path=bgm_path, title=title)
+            res = premiere_automation.build_pro_editing_package(clip_paths, voiceover_path=vo_path, bgm_path=bgm_path, title=title)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_cors_headers()
             self.end_headers()
-            self.wfile.write(json.dumps({"success": True, "xml": xml_res, "jsx": jsx_res}).encode("utf-8"))
+            self.wfile.write(json.dumps({"success": True, **res}).encode("utf-8"))
             return
 
         # API: Launch Adobe Premiere Pro 2026

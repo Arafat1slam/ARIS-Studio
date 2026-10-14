@@ -20,6 +20,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Python
+.vscode/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -72,7 +73,13 @@ tools/*.exe
 *.sha
 *.nfo
 Adobe Premiere Pro*/
-aftereffects-mcp/
-tools/aftereffects-mcp/
 
-
+# Premiere & AE generated files
+data/premiere_projects/*
+!data/premiere_projects/.gitkeep
+data/premiere_scripts/*
+!data/premiere_scripts/.gitkeep
+data/ae_scripts/*
+!data/ae_scripts/.gitkeep
+data/ae_previews/*
+!data/ae_previews/.gitkeep

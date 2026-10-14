@@ -44,6 +44,7 @@ import scenepacks_fetcher
 import animeclips_fetcher
 import quality_control
 import premiere_automation
+import aftereffects_bridge
 import gemini_metadata
 import edge_tts
 
@@ -303,10 +304,10 @@ def produce_channel2_short():
     ass_path = os.path.join(TEMP_DIR, f"subs_ch2_{timestamp}.ass")
     create_ass_subtitles(cues, script_data["lines"], ass_path, badge=script_data.get("badge", "DARK PSYCHOLOGY: RULE OF REACTION"))
 
-    # 4. Adobe Premiere Pro 2026 Project / Sequence XML & JSX
-    print("\n🎬 Generating Premiere Pro 2026 Sequence Files...")
-    xml_res = premiere_automation.generate_fcp_xml_sequence(fc_clips, voiceover_path=vo_path, bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
-    jsx_res = premiere_automation.generate_premiere_extendscript(fc_clips, voiceover_path=vo_path, bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
+    # 4. Adobe Premiere Pro 2026 & After Effects Pro Suite
+    print("\n🎬 Generating Premiere Pro 2026 & After Effects Sequence Files...")
+    ppro_res = premiere_automation.build_pro_editing_package(fc_clips, voiceover_path=vo_path, bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(fc_clips, words=["NEVER", "REACT", "ALWAYS", "CONTROL"], bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
 
     # 5. Master Render via FFmpeg
     output_filename = f"ch2_dark_psychology_{timestamp}.mp4"
@@ -378,8 +379,9 @@ def produce_channel2_short():
         "success": True,
         "video_path": output_path,
         "source_clips": fc_clips,
-        "premiere_xml": xml_res["xml_path"],
-        "premiere_jsx": jsx_res["script_path"],
+        "premiere_xml": ppro_res["xml"]["xml_path"],
+        "premiere_jsx": ppro_res["jsx"]["script_path"],
+        "aftereffects_jsx": ae_res["file_path"],
         "seo_metadata": seo,
         "qc_passed": True
     }

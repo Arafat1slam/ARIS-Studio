@@ -27,6 +27,7 @@ sys.path.append(os.path.join(PROJECT_DIR, "scripts"))
 
 import quality_control
 import premiere_automation
+import aftereffects_bridge
 
 FFMPEG = r"tools\ffmpeg.exe" if os.path.exists(r"tools\ffmpeg.exe") else "ffmpeg"
 BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll", "scenepacks")
@@ -164,9 +165,9 @@ def render_eitax_god_tier_anime_short(output_filename="God_Tier_Anime_AMV_4K.mp4
     qc = quality_control.audit_video(out_path)
     print(f"QC Audit Result: Passed={qc['passed']} (Issues: {qc['issues']})")
 
-    # 7. Premiere Pro 2026 Project Generation
-    xml_res = premiere_automation.generate_fcp_xml_sequence(selected_clips, bgm_path=mastered_audio, title="GodTier_EitaX_AMV_4K")
-    jsx_res = premiere_automation.generate_premiere_extendscript(selected_clips, bgm_path=mastered_audio, title="GodTier_EitaX_AMV_4K")
+    # 7. Premiere Pro 2026 & After Effects Pro Suite
+    ppro_res = premiere_automation.build_pro_editing_package(selected_clips, bgm_path=mastered_audio, title="GodTier_EitaX_AMV_4K")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(selected_clips, words=["CRIMSON", "MOON", "UPPER", "THREE", "AKAZA"], bgm_path=mastered_audio, title="GodTier_EitaX_AMV_4K")
 
     return out_path
 
@@ -285,9 +286,9 @@ def render_master_dark_psychology_short(output_filename="God_Tier_Dark_Psycholog
     qc = quality_control.audit_video(out_path)
     print(f"QC Audit Result: Passed={qc['passed']} (Issues: {qc['issues']})")
 
-    # 6. Premiere Pro 2026 Project
-    xml_res = premiere_automation.generate_fcp_xml_sequence(selected_fc, voiceover_path=vo_file, bgm_path=bgm_path, title="GodTier_FightClub_Dark_Psychology")
-    jsx_res = premiere_automation.generate_premiere_extendscript(selected_fc, voiceover_path=vo_file, bgm_path=bgm_path, title="GodTier_FightClub_Dark_Psychology")
+    # 6. Premiere Pro 2026 & After Effects Pro Suite
+    ppro_res = premiere_automation.build_pro_editing_package(selected_fc, voiceover_path=vo_file, bgm_path=bgm_path, title="GodTier_FightClub_Dark_Psychology")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(selected_fc, words=["LOSING", "ALL", "HOPE", "WAS", "FREEDOM"], bgm_path=bgm_path, title="GodTier_FightClub_Dark_Psychology")
 
     return out_path
 

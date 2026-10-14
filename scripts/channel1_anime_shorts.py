@@ -36,6 +36,7 @@ import scenepacks_fetcher
 import animeclips_fetcher
 import quality_control
 import premiere_automation
+import aftereffects_bridge
 import gemini_metadata
 
 TOOLS_FFMPEG = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
@@ -154,9 +155,9 @@ def produce_channel1_short(source="scenepacks", anime_slug=None):
     if not qc["passed"]:
         output_path = quality_control.remediate_video(output_path)
 
-    # 5. Premiere Pro 2026 XML & JSX
-    xml_res = premiere_automation.generate_fcp_xml_sequence(selected_clips, bgm_path=phonk_bgm, title="Channel1_Viral_Anime")
-    jsx_res = premiere_automation.generate_premiere_extendscript(selected_clips, bgm_path=phonk_bgm, title="Channel1_Viral_Anime")
+    # 5. Adobe Premiere Pro 2026 & After Effects Pro Suite
+    ppro_res = premiere_automation.build_pro_editing_package(selected_clips, bgm_path=phonk_bgm, title="Channel1_Viral_Anime")
+    ae_res = aftereffects_bridge.generate_pro_aftereffects_comp(selected_clips, words=["THE", "STRONGEST", "LIMITLESS", "GOJO"], bgm_path=phonk_bgm, title="Channel1_Viral_Anime")
 
     # 6. SEO Metadata
     seo = gemini_metadata.generate_seo_metadata("Gojo Satoru Jujutsu Kaisen 9:16 Viral Phonk Edit", "Viral Phonk Anime Edit for iταchι Live")
@@ -166,8 +167,9 @@ def produce_channel1_short(source="scenepacks", anime_slug=None):
         "video_path": output_path,
         "source_clips": selected_clips,
         "qc_passed": True,
-        "premiere_xml": xml_res["xml_path"],
-        "premiere_jsx": jsx_res["script_path"],
+        "premiere_xml": ppro_res["xml"]["xml_path"],
+        "premiere_jsx": ppro_res["jsx"]["script_path"],
+        "aftereffects_jsx": ae_res["file_path"],
         "seo_metadata": seo
     }
 

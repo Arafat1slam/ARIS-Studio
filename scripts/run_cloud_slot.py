@@ -96,15 +96,15 @@ def main():
     success = True
     if target in ("ch1", "both"):
         ok = run_command(
-            [sys.executable, "-u", "scripts/pipeline_orchestrator.py", "--auto"],
-            "Channel 1 (iταchι Live - Anime Short, Instagram Reel & FB)"
+            [sys.executable, "-u", "scripts/channel1_anime_shorts.py"],
+            "Channel 1 (iταchι Live - AnimeClips.online -> 9:16 Short + Premiere Pro XML + QC)"
         )
         success = success and ok
 
     if target in ("ch2", "both"):
         ok = run_command(
-            [sys.executable, "-u", "scripts/dark_psychology_generator.py", "--auto"],
-            "Channel 2 (ArisVexx - Dark Psychology Short)"
+            [sys.executable, "-u", "scripts/channel2_dark_psychology.py"],
+            "Channel 2 (ArisVexx - A Silent Voice -> Dark Psychology + Voiceover + Premiere Pro XML + QC)"
         )
         success = success and ok
 

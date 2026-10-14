@@ -23,6 +23,11 @@ sys.path.append(os.path.join(PROJECT_DIR, "scripts"))
 import custom_ai_editor
 import aftereffects_bridge
 import copyright_remover
+import animeclips_fetcher
+import channel1_anime_shorts
+import channel2_dark_psychology
+import quality_control
+import premiere_automation
 
 PORT = 8585
 FRONTEND_DIST = os.path.join(PROJECT_DIR, "frontend", "dist")
@@ -77,14 +82,36 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(get_system_status()).encode("utf-8"))
             return
 
-        # 2. API: After Effects Status
-        if path == "/api/ae/status":
+        # 2. API: After Effects & Premiere Pro Status
+        if path == "/api/ae/status" or path == "/api/premiere/status":
             status = aftereffects_bridge.check_bridge_connection()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(status).encode("utf-8"))
+            return
+
+        # 2.1 API: AnimeClips.online Titles List
+        if path == "/api/animeclips/titles":
+            titles = animeclips_fetcher.get_all_titles()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(titles).encode("utf-8"))
+            return
+
+        # 2.2 API: AnimeClips.online Clips by Slug
+        if path.startswith("/api/animeclips/clips"):
+            query_params = urllib.parse.parse_qs(parsed.query)
+            slug = query_params.get("slug", ["a-silent-voice"])[0]
+            clips = animeclips_fetcher.get_title_clips(slug)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(clips).encode("utf-8"))
             return
 
         # 3. Stream Video Files for React Player
@@ -290,8 +317,95 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_cors_headers()
                 self.end_headers()
-                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
-                return
+        # API: Pipeline - Channel 1 Anime Shorts
+        if path == "/api/pipeline/channel1":
+            slug = data.get("slug", "a-silent-voice")
+            custom_clip = data.get("clip_path")
+            res = channel1_anime_shorts.produce_channel1_short(anime_slug=slug, custom_clip_path=custom_clip)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
+
+        # API: Pipeline - Channel 2 Dark Psychology
+        if path == "/api/pipeline/channel2":
+            res = channel2_dark_psychology.produce_channel2_short()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
+
+        # API: AnimeClips.online Download Single Clip
+        if path == "/api/animeclips/download":
+            clip_info = data.get("clip")
+            target_dir = data.get("target_dir", os.path.join(PROJECT_DIR, "data", "approved_clips"))
+            dl_path = animeclips_fetcher.download_clip(clip_info, target_dir)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": bool(dl_path), "path": dl_path}).encode("utf-8"))
+            return
+
+        # API: Quality Control Audit
+        if path == "/api/qc/audit":
+            vpath = data.get("video_path", "").strip()
+            if not os.path.isabs(vpath):
+                vpath = os.path.join(PROJECT_DIR, vpath)
+            res = quality_control.audit_video(vpath)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
+
+        # API: Quality Control Auto-Remediation
+        if path == "/api/qc/remediate":
+            vpath = data.get("video_path", "").strip()
+            if not os.path.isabs(vpath):
+                vpath = os.path.join(PROJECT_DIR, vpath)
+            res = quality_control.remediate_video(vpath)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
+
+        # API: Adobe Premiere Pro XML & ExtendScript Export
+        if path == "/api/premiere/export":
+            clip_paths = data.get("clip_paths", [])
+            title = data.get("title", "ARIS AI Short")
+            vo_path = data.get("voiceover_path")
+            bgm_path = data.get("bgm_path")
+            xml_res = premiere_automation.generate_fcp_xml_sequence(clip_paths, voiceover_path=vo_path, bgm_path=bgm_path, title=title)
+            jsx_res = premiere_automation.generate_premiere_extendscript(clip_paths, voiceover_path=vo_path, bgm_path=bgm_path, title=title)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "xml": xml_res, "jsx": jsx_res}).encode("utf-8"))
+            return
+
+        # API: Launch Adobe Premiere Pro 2026
+        if path == "/api/premiere/launch":
+            ppro_path = "C:\\Program Files\\Adobe\\Adobe Premiere Pro 2026\\Adobe Premiere Pro.exe"
+            if os.path.exists(ppro_path):
+                subprocess.Popen([ppro_path])
+                res = {"success": True, "message": "Adobe Premiere Pro 2026 launched successfully!"}
+            else:
+                res = {"success": False, "error": "Premiere Pro executable not found in standard path"}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
 
         self.send_response(404)
         self.end_headers()

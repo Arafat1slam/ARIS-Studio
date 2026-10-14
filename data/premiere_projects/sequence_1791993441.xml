@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xmeml version="4">
+  <sequence>
+    <name>Test Premiere Short_1791993441</name>
+    <duration>180</duration>
+    <rate>
+      <timebase>30</timebase>
+      <ntsc>FALSE</ntsc>
+    </rate>
+    <media>
+      <video>
+        <format>
+          <samplecharacteristics>
+            <width>1080</width>
+            <height>1920</height>
+            <pixelaspectratio>square</pixelaspectratio>
+          </samplecharacteristics>
+        </format>
+        <track>
+          <clipitem id="clipitem-1">
+            <name>Koe no Katachi 702.mp4</name>
+            <duration>90</duration>
+            <start>0</start>
+            <end>90</end>
+            <in>0</in>
+            <out>90</out>
+            <file id="file-1">
+              <name>Koe no Katachi 702.mp4</name>
+              <pathurl>file://localhost/D:/ALL PROJECT/WORK FLOW/ARIS-Studio/data/approved_clips/Koe no Katachi 702.mp4</pathurl>
+            </file>
+          </clipitem>
+          <clipitem id="clipitem-2">
+            <name>Koe no Katachi 702_qc_fixed.mp4</name>
+            <duration>90</duration>
+            <start>90</start>
+            <end>180</end>
+            <in>0</in>
+            <out>90</out>
+            <file id="file-2">
+              <name>Koe no Katachi 702_qc_fixed.mp4</name>
+              <pathurl>file://localhost/D:/ALL PROJECT/WORK FLOW/ARIS-Studio/data/approved_clips/Koe no Katachi 702_qc_fixed.mp4</pathurl>
+            </file>
+          </clipitem>
+        </track>
+      </video>
+    </media>
+  </sequence>
+</xmeml>

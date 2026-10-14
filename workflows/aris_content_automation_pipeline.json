@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "command": "python \"scripts/pipeline_orchestrator.py\""
+        "command": "python \"scripts/run_cloud_slot.py\" auto"
       },
       "id": "execute-orchestrator-node",
       "name": "Execute Pipeline Orchestrator",

@@ -302,7 +302,7 @@ def process_copyright_removal(video_path, watermark_text="ARIS", mode="9:16_shor
     
     if mode == "9:16_short" and is_widescreen:
         # High-performance 9:16 Ambient Remaster (Cinematic blurred background + sharp centered foreground)
-        filter_complex = (
+        video_filter = (
             f"[0:v]split[bg][fg];"
             f"[bg]scale=270:480:force_original_aspect_ratio=increase,crop=270:480,boxblur=10:2,scale=1080:1920,"
             f"eq=brightness=-0.08:contrast=1.05[bg_dark];"
@@ -311,16 +311,31 @@ def process_copyright_removal(video_path, watermark_text="ARIS", mode="9:16_shor
             f"[bg_dark][fg_sharp]overlay=(W-w)/2:(H-h)/2,"
             f"vignette=PI/4.6,setpts=PTS/{tempo},{watermark_str}[v]"
         )
+    elif mode == "mirror_clean":
+        # Subtle Mirror & Rescale
+        video_filter = (
+            f"[0:v]hflip,crop=in_w*0.96:in_h*0.96:(in_w-out_w)/2:(in_h-out_h)/2,"
+            f"eq=contrast=1.12:saturation=1.18:brightness=0.01,"
+            f"unsharp=5:5:0.7:5:5:0.0,vignette=PI/4.8,setpts=PTS/{tempo},{watermark_str}[v]"
+        )
     else:
         # Subtle Crop + Re-grade (Destroys edge hashes while preserving aspect ratio)
-        filter_complex = (
+        video_filter = (
             f"[0:v]crop=in_w*0.96:in_h*0.96:(in_w-out_w)/2:(in_h-out_h)/2,"
             f"eq=contrast=1.12:saturation=1.18:brightness=0.01,"
             f"unsharp=5:5:0.7:5:5:0.0,vignette=PI/4.8,setpts=PTS/{tempo},{watermark_str}[v]"
         )
 
-    # Audio Anti-ContentID filter: tempo shift + parametric dual-band equalizer
-    audio_filter = f"atempo={tempo},equalizer=f=110:width_type=h:width=100:g=4,equalizer=f=3500:width_type=h:width=1000:g=3"
+    has_audio = info.get("has_audio", False)
+    safe_tempo = max(0.5, min(tempo, 2.0))
+
+    if has_audio:
+        # Audio Anti-ContentID filter: tempo shift + parametric dual-band equalizer
+        # Preserves the song / background music while neutralizing automated ContentID fingerprint
+        audio_filter = f"[0:a]atempo={safe_tempo},equalizer=f=110:width_type=h:width=100:g=3,equalizer=f=3500:width_type=h:width=1000:g=2[a]"
+        filter_complex = f"{video_filter};{audio_filter}"
+    else:
+        filter_complex = video_filter
 
     cmd = [
         ffmpeg_bin, "-y",
@@ -329,8 +344,8 @@ def process_copyright_removal(video_path, watermark_text="ARIS", mode="9:16_shor
         "-map", "[v]"
     ]
     
-    if info["has_audio"]:
-        cmd.extend(["-af", audio_filter, "-c:a", "aac", "-b:a", "192k"])
+    if has_audio:
+        cmd.extend(["-map", "[a]", "-c:a", "aac", "-b:a", "192k"])
     else:
         cmd.extend(["-an"])
 

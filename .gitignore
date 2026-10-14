@@ -65,3 +65,12 @@ $RECYCLE.BIN/
 tools/*.exe
 !tools/.gitkeep
 
+# Adobe Installers & Disc Images
+*.iso
+*.sfv
+*.md5
+*.sha
+*.nfo
+Adobe Premiere Pro*/
+
+

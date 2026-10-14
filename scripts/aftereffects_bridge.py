@@ -76,6 +76,14 @@ def find_after_effects_exe():
         return candidates[0]
     return None
 
+def find_premiere_pro_exe():
+    """Look for Adobe Premiere Pro.exe on Windows."""
+    candidates = glob.glob(r"C:\Program Files\Adobe\Adobe Premiere Pro*\Adobe Premiere Pro.exe") + \
+                 glob.glob(r"D:\*\Adobe\Adobe Premiere Pro*\Adobe Premiere Pro.exe")
+    if candidates:
+        return candidates[0]
+    return None
+
 def execute_bridge_call(fn, args=None):
     """Execute any tool call on the live After Effects CEP Bridge (Port 7788)."""
     token = get_bridge_token()
@@ -94,12 +102,15 @@ def execute_bridge_call(fn, args=None):
         return {"ok": False, "error": str(e)}
 
 def check_bridge_connection():
-    """Check if the AE MCP Bridge CEP panel is open and listening."""
+    """Check if the AE / Premiere Pro MCP Bridge CEP panel is open and listening."""
     token = get_bridge_token()
     panel_installed = is_panel_installed()
     mcp_present = os.path.exists(AE_MCP_DIR)
     
     bridge_res = execute_bridge_call("project_info", {})
+    ae_exe = find_after_effects_exe()
+    ppro_exe = find_premiere_pro_exe()
+    
     if bridge_res.get("ok"):
         return {
             "online": True,
@@ -108,10 +119,13 @@ def check_bridge_connection():
             "panel_installed": panel_installed,
             "project_info": bridge_res["data"].get("result", {}),
             "token_configured": bool(token),
-            "message": "After Effects MCP Bridge is actively connected on port 7788!"
+            "ae_installed": bool(ae_exe),
+            "ae_path": ae_exe or "Not installed",
+            "premiere_installed": bool(ppro_exe),
+            "premiere_path": ppro_exe or "Not installed",
+            "message": "Adobe MCP Bridge is actively connected on port 7788!"
         }
     
-    ae_exe = find_after_effects_exe()
     return {
         "online": False,
         "port": DEFAULT_PORT,
@@ -120,7 +134,9 @@ def check_bridge_connection():
         "error": bridge_res.get("error"),
         "ae_installed": bool(ae_exe),
         "ae_path": ae_exe or "Not found in standard Adobe directory",
-        "message": "Extension com.aemcpbridge is installed in Adobe CEP. Launch After Effects and go to: Window > Extensions > AE MCP Bridge to start live bridge."
+        "premiere_installed": bool(ppro_exe),
+        "premiere_path": ppro_exe or "Not found in standard Adobe directory",
+        "message": "Extension com.aemcpbridge is installed in Adobe CEP. Launch Premiere Pro or After Effects and go to: Window > Extensions > AE MCP Bridge to start live bridge."
     }
 
 def generate_extendscript_with_ai(prompt, comp_type="9:16"):

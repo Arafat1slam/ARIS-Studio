@@ -72,5 +72,7 @@ tools/*.exe
 *.sha
 *.nfo
 Adobe Premiere Pro*/
+aftereffects-mcp/
+tools/aftereffects-mcp/
 
 

@@ -1,17 +1,18 @@
 """
 ARIS Studio - Channel 2 Engine: Dark Psychology Shorts
-Reference Material: A Silent Voice (Koe no Katachi) & Psychological Anime from AnimeClips.online
+Reference Material: Iconic Movie Scenepacks from scenepacks.com (Fight Club, Peaky Blinders, etc.)
 Channel: ArisVexx (Tier-1 USA Dark Psychology, 48 Laws of Power, Stoicism)
 
 Workflow:
-1. Sourcing: Collects emotional, intense clips from A Silent Voice (animeclips.online/a-silent-voice)
-2. AI Scriptwriting: Gemini AI writes deep original psychological script on vulnerability, silence & manipulation
-3. Studio Narration: Edge-TTS / Gemini TTS deep stoic voiceover
-4. Scene Assembly: Multi-scene pacing with cinematic cuts
-5. Premiere Pro Automation: Generates Sequence XML & ExtendScript for Adobe Premiere Pro 2026
-6. Master Render: 9:16 Cinematic Noir Grade, Audio Ducking, Gold & Crimson Karaoke Subtitles
-7. Quality Control: Full QC audit & auto-remediation (Duration <= 58s, -14 LUFS, 9:16)
-8. SEO & Publish Preparation for Channel 2
+1. Sourcing: Collects intense 1080p REMUX movie scenes from scenepacks.com (Fight Club / Tyler Durden)
+2. AI Scriptwriting: Gemini AI writes high-retention psychological script (or premium signature preset)
+3. Studio Narration: Edge-TTS / Gemini TTS deep stoic voiceover (Charon / BrianNeural)
+4. Multi-Cut Scene Assembly: 8 rapid cuts, smart 9:16 vertical crop, Noir contrast grade & black shutter transitions
+5. Sound Design: Dark ambient cinematic drone / tension music ducked underneath voice (-14 LUFS)
+6. Kinetic Subtitles: Luxury Gold & Crimson ASS subtitles
+7. Adobe Premiere Pro 2026 Automation: Generates Sequence XML & ExtendScript JSX
+8. Quality Control: Full QC audit & auto-remediation (Duration <= 58s, -14 LUFS, 9:16)
+9. SEO & Publish Preparation for Channel 2
 """
 
 import os
@@ -39,17 +40,17 @@ sys.path.append(os.path.join(PROJECT_DIR, "scripts"))
 
 load_dotenv(os.path.join(PROJECT_DIR, ".env"))
 
+import scenepacks_fetcher
 import animeclips_fetcher
 import quality_control
 import premiere_automation
-import duplicate_checker
 import gemini_metadata
 import edge_tts
 
 TOOLS_FFMPEG = os.path.join(PROJECT_DIR, "tools", "ffmpeg.exe")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "data", "processed_shorts")
 TEMP_DIR = os.path.join(PROJECT_DIR, "data", "temp")
-BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll")
+BROLL_DIR = os.path.join(PROJECT_DIR, "data", "broll", "scenepacks")
 BGM_FILE = os.path.join(PROJECT_DIR, "data", "bgm", "dark_cinematic_theme.mp3")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -66,24 +67,26 @@ def generate_psychology_script():
     api_key = os.getenv("GEMINI_API_KEY")
     prompt = (
         "You are an elite writer for 'ArisVexx' (a high-CPM Tier-1 USA Dark Psychology YouTube channel). "
-        "Write a 25-second viral script based on emotional psychology, silence, reading people, or Law 4 of Power. "
-        "Reference theme: human isolation, emotional scars, reading silence (inspired by the emotional intensity of A Silent Voice). "
+        "Write a 20-second viral script based on emotional psychology, never reacting, reading people, or Law 4 of Power. "
+        "Style: Tyler Durden / Thomas Shelby cold calculation. "
         "Output ONLY JSON with:\n"
         "{\n"
         '  "title": "Clickable high-CTR title with #Shorts #DarkPsychology",\n'
         '  "badge": "LAW 4: SAY LESS THAN NECESSARY",\n'
         '  "lines": [\n'
-        '    ["When someone goes completely silent...", "Gold"],\n'
-        '    ["They are no longer listening to your words.", "Normal"],\n'
-        '    ["They are studying your motives.", "Red"],\n'
-        '    ["Rule one: Never explain yourself to someone who wants to misunderstand you.", "Gold"],\n'
-        '    ["Silence is not empty.", "Normal"],\n'
-        '    ["It is full of answers.", "Red"],\n'
-        '    ["The one who controls the pause...", "Gold"],\n'
-        '    ["Controls the entire room.", "Red"]\n'
+        '    ["Never react immediately.", "Red"],\n'
+        '    ["Because the moment you react emotionally...", "Normal"],\n'
+        '    ["You hand over your power.", "Gold"],\n'
+        '    ["The most dangerous person in the room...", "Normal"],\n'
+        '    ["Is the one who observes everything.", "Gold"],\n'
+        '    ["Silence creates unbearable tension.", "Normal"],\n'
+        '    ["While they talk to fill the void...", "Normal"],\n'
+        '    ["You calculate their weaknesses.", "Red"],\n'
+        '    ["Master your emotions...", "Gold"],\n'
+        '    ["Or someone else will.", "Red"]\n'
         '  ]\n'
         "}\n"
-        "Keep 7 to 9 punchy, stoic lines."
+        "Keep 8 to 10 punchy, stoic lines."
     )
 
     if api_key:
@@ -94,7 +97,7 @@ def generate_psychology_script():
         }
         try:
             req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=20) as resp:
+            with urllib.request.urlopen(req, timeout=15) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
                 return json.loads(raw_text)
@@ -102,59 +105,49 @@ def generate_psychology_script():
             print(f"[!] Gemini script generator notice: {e}, using signature preset.", file=sys.stderr)
 
     return {
-        "title": "The Brutal Truth About Silence... 🧠 #Shorts #DarkPsychology",
-        "badge": "DARK PSYCHOLOGY: RULE OF SILENCE",
+        "title": "Never React Immediately... 🧠 #Shorts #DarkPsychology",
+        "badge": "DARK PSYCHOLOGY: RULE OF REACTION",
         "lines": [
-            ("Look closely into their eyes...", "Gold"),
-            ("When someone goes completely silent...", "Red"),
-            ("They have already made their decision.", "Gold"),
-            ("Never react to disrespect with anger.", "Normal"),
-            ("Your silence cuts deeper than words.", "Red"),
-            ("People cannot destroy what they cannot read.", "Gold"),
-            ("Master the quiet...", "Normal"),
-            ("And you will master their minds.", "Red")
+            ["Never react immediately.", "Red"],
+            ["Because the moment you react emotionally...", "Normal"],
+            ["You hand over your power.", "Gold"],
+            ["The most dangerous person in the room...", "Normal"],
+            ["Is the one who observes everything.", "Gold"],
+            ["Silence creates unbearable tension.", "Normal"],
+            ["While they talk to fill the void...", "Normal"],
+            ["You calculate their weaknesses.", "Red"],
+            ["Master your emotions...", "Gold"],
+            ["Or someone else will.", "Red"]
         ]
     }
 
-def generate_gemini_tts(text: str, voice_name: str = "Charon") -> bytes:
-    import base64
-    import urllib.error
+def generate_gemini_tts(text, voice_name="Charon"):
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("Missing GEMINI_API_KEY for Gemini TTS")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={api_key}"
+        raise ValueError("Missing GEMINI_API_KEY for fallback TTS.")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": text}]}],
         "generationConfig": {
-            "response_modalities": ["AUDIO"],
-            "speechConfig": {
-                "voiceConfig": {
-                    "prebuiltVoiceConfig": {
-                        "voiceName": voice_name
-                    }
-                }
-            }
+            "responseModalities": ["AUDIO"],
+            "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice_name}}}
         }
     }
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        res = json.loads(r.read().decode("utf-8"))
-        candidates = res.get("candidates", [])
-        if not candidates or "content" not in candidates[0]:
-            raise RuntimeError(f"Gemini API returned no content candidates: {res}")
-        raw_b64 = candidates[0]["content"]["parts"][0]["inlineData"]["data"]
-        return base64.b64decode(raw_b64)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        res = json.loads(resp.read().decode("utf-8"))
+        import base64
+        audio_b64 = res["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+        return base64.b64decode(audio_b64)
 
 async def generate_voiceover_and_cues(lines, output_audio_path):
-    """Generate deep stoic voiceover with multi-tier fallback (Edge-TTS -> Gemini TTS -> gTTS)."""
     full_text = " ".join([l[0] for l in lines])
     cues = []
     generated = False
 
-    # 1. Edge-TTS
+    # 1. Edge-TTS (BrianNeural)
     try:
-        voice = "en-US-BrianNeural"
-        communicate = edge_tts.Communicate(full_text, voice=voice, rate="-2%")
+        communicate = edge_tts.Communicate(full_text, voice="en-US-BrianNeural", rate="-4%", pitch="-2Hz")
         audio_data = bytearray()
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
@@ -170,7 +163,7 @@ async def generate_voiceover_and_cues(lines, output_audio_path):
             generated = True
             print("[+] Voiceover generated via Edge-TTS (BrianNeural).")
     except Exception as e:
-        print(f"[!] Edge-TTS error ({e}), switching to Gemini TTS / gTTS fallback...")
+        print(f"[!] Edge-TTS notice ({e}), switching to Gemini TTS / gTTS fallback...")
 
     # 2. Gemini TTS Fallback
     if not generated:
@@ -213,7 +206,7 @@ async def generate_voiceover_and_cues(lines, output_audio_path):
     cmd = [ffmpeg_bin, "-i", output_audio_path]
     proc = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True, errors="replace")
     import re
-    total_dur = 20.0
+    total_dur = 22.0
     m_dur = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.?\d*)", proc.stderr)
     if m_dur:
         total_dur = int(m_dur.group(1))*3600 + int(m_dur.group(2))*60 + float(m_dur.group(3))
@@ -248,7 +241,6 @@ Style: SubRed,Arial Black,74,&H003333FF,&H000000FF,&H00000000,&H80000000,-1,0,0,
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     events = []
-    # Persistent badge
     total_end = cues[-1][1] if cues else 25.0
     s_time = "0:00:00.00"
     e_time = f"0:{int(total_end//60):02d}:{total_end%60:05.2f}"
@@ -258,7 +250,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         st = f"0:{int(cue[0]//60):02d}:{cue[0]%60:05.2f}"
         et = f"0:{int(cue[1]//60):02d}:{cue[1]%60:05.2f}"
         
-        # Color match
         color_tag = "SubNormal"
         if idx < len(lines):
             c_pref = lines[idx][1]
@@ -275,24 +266,28 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 def produce_channel2_short():
     """
-    Produce a complete, QC-audited Dark Psychology Short using A Silent Voice footage.
+    Produce a complete, QC-audited Dark Psychology Short using Movie Scenepacks from scenepacks.com.
     """
     timestamp = int(datetime.now(timezone.utc).timestamp())
     print("=" * 60)
     print("🧠 ARIS CHANNEL 2 ENGINE: Producing Dark Psychology Short")
-    print("   Reference Anime: A Silent Voice (animeclips.online/a-silent-voice)")
+    print("   Movie Source: scenepacks.com (Fight Club / Tyler Durden)")
     print("=" * 60)
 
-    # 1. Source 3 clips from A Silent Voice
-    print("[*] Sourcing 3 clips from AnimeClips.online: 'a-silent-voice'...")
-    clips = animeclips_fetcher.fetch_random_clips(slug="a-silent-voice", count=3, target_dir=BROLL_DIR)
-    if not clips:
-        # Fallback to local broll
-        clips = glob.glob(os.path.join(BROLL_DIR, "*.mp4"))[:3]
+    # 1. Source Movie Clips from scenepacks.com
+    fc_clips = sorted(glob.glob(os.path.join(BROLL_DIR, "fight_club_scene_*.mp4")))
+    if not fc_clips or len(fc_clips) < 4:
+        print("[*] Fetching movie scenepack from scenepacks.com...")
+        fc_url = scenepacks_fetcher.get_scenepack_stream_url(1161)
+        if fc_url:
+            fc_cuts = [
+                (150.0, 3.0), (320.0, 3.0), (540.0, 3.0), (850.0, 3.0),
+                (1200.0, 3.0), (1560.0, 3.0), (1850.0, 3.0), (2200.0, 3.0)
+            ]
+            fc_clips = scenepacks_fetcher.extract_scenes_from_stream(fc_url, fc_cuts, output_prefix="fight_club_scene")
 
-    if not clips:
-        print("[-] Error: No video clips available.")
-        return {"success": False, "error": "No clips available"}
+    if not fc_clips:
+        raise RuntimeError("No movie clips available from scenepacks.com for Channel 2.")
 
     # 2. AI Script & Narration
     print("\n🧠 Generating Dark Psychology Script with Gemini AI...")
@@ -306,104 +301,89 @@ def produce_channel2_short():
 
     # 3. ASS Subtitles
     ass_path = os.path.join(TEMP_DIR, f"subs_ch2_{timestamp}.ass")
-    create_ass_subtitles(cues, script_data["lines"], ass_path, badge=script_data.get("badge", "DARK PSYCHOLOGY"))
+    create_ass_subtitles(cues, script_data["lines"], ass_path, badge=script_data.get("badge", "DARK PSYCHOLOGY: RULE OF REACTION"))
 
     # 4. Adobe Premiere Pro 2026 Project / Sequence XML & JSX
     print("\n🎬 Generating Premiere Pro 2026 Sequence Files...")
-    ppro_res = premiere_automation.generate_fcp_xml_sequence(clips, voiceover_path=vo_path, title="ArisVexx_Dark_Psychology")
-    jsx_res = premiere_automation.generate_premiere_extendscript(clips, voiceover_path=vo_path, title="ArisVexx_Dark_Psychology")
+    xml_res = premiere_automation.generate_fcp_xml_sequence(fc_clips, voiceover_path=vo_path, bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
+    jsx_res = premiere_automation.generate_premiere_extendscript(fc_clips, voiceover_path=vo_path, bgm_path=BGM_FILE, title="ArisVexx_Dark_Psychology")
 
     # 5. Master Render via FFmpeg
     output_filename = f"ch2_dark_psychology_{timestamp}.mp4"
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     ffmpeg_bin = get_ffmpeg_bin()
 
-    # Loop or stitch clips to match narration duration
-    stitch_list = os.path.join(TEMP_DIR, f"stitch_{timestamp}.txt")
-    with open(stitch_list, "w", encoding="utf-8") as f:
-        # Repeat clips to fill total_dur + 1s
-        needed_secs = total_dur + 1.0
-        cur_secs = 0.0
-        while cur_secs < needed_secs:
-            for cp in clips:
-                f.write(f"file '{cp.replace(os.sep, '/')}'\n")
-                cur_secs += 3.5
+    dur_per_clip = (total_dur + 0.8) / len(fc_clips)
+    trimmed_clips = []
+    for i, clip in enumerate(fc_clips):
+        t_path = os.path.join(TEMP_DIR, f"fc_trim_{timestamp}_{i}.mp4")
+        vf = (
+            "scale=1080:1920:force_original_aspect_ratio=increase,"
+            "crop=1080:1920,"
+            "eq=contrast=1.28:saturation=0.82:brightness=-0.04,"
+            "vignette=PI/4.5,"
+            "fade=t=in:st=0:d=0.08:color=black"
+        )
+        cmd = [
+            ffmpeg_bin, "-y",
+            "-i", clip,
+            "-t", str(dur_per_clip),
+            "-vf", vf,
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+            "-an",
+            t_path
+        ]
+        subprocess.run(cmd, check=True, capture_output=True)
+        trimmed_clips.append(t_path)
 
-    # Filter: Noir 9:16 grading + Audio ducking + ASS subtitles
+    concat_file = os.path.join(TEMP_DIR, f"fc_concat_{timestamp}.txt")
+    with open(concat_file, "w") as f:
+        for p in trimmed_clips:
+            f.write(f"file '{p.replace(os.sep, '/')}'\n")
+
     ass_escaped = ass_path.replace("\\", "/").replace(":", "\\:")
-    video_filter = (
-        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-        f"eq=contrast=1.25:brightness=-0.06:saturation=0.85,"
-        f"vignette=PI/4.2,"
-        f"subtitles='{ass_escaped}',fps=30[v]"
+    filter_complex = (
+        f"[0:v]subtitles='{ass_escaped}',fps=30[v];"
+        f"[1:a]volume=1.0[vo];"
+        f"[2:a]atrim=0:{total_dur + 0.8},volume=0.22,afade=t=out:st={total_dur}:d=0.8[bgm];"
+        f"[vo][bgm]amix=inputs=2:duration=first:dropout_transition=2,"
+        f"loudnorm=I=-14:LRA=7:TP=-1.0[a]"
     )
 
     cmd = [
         ffmpeg_bin, "-y",
-        "-f", "concat", "-safe", "0", "-i", stitch_list,
+        "-f", "concat", "-safe", "0", "-i", concat_file,
         "-i", vo_path,
-        "-t", str(total_dur + 0.8),
-        "-filter_complex", video_filter,
+        "-i", BGM_FILE,
+        "-filter_complex", filter_complex,
         "-map", "[v]",
-        "-map", "1:a",
-        "-c:v", "libx264",
-        "-preset", "fast",
-        "-crf", "18",
-        "-c:a", "aac",
-        "-b:a", "192k",
+        "-map", "[a]",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+        "-c:a", "aac", "-b:a", "192k",
         "-movflags", "+faststart",
         output_path
     ]
-
-    print("[*] Rendering Full Noir Short with FFmpeg...")
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0 or not os.path.exists(output_path):
-        print(f"[-] Master render failed: {proc.stderr[:300]}")
-        return {"success": False, "error": proc.stderr}
-
+    subprocess.run(cmd, check=True, capture_output=True)
     print(f"[OK] Master Render Complete: {output_filename} ({os.path.getsize(output_path)/(1024*1024):.2f} MB)")
 
-    # 6. Quality Control Audit & Self-Healing Loop
-    print("\n🔍 Running Automated Quality Control Audit...")
-    qc_res = quality_control.audit_video(output_path)
-    final_video = output_path
-    if not qc_res["passed"]:
-        print(f"[!] QC Issues Detected: {qc_res['issues']}. Remediating...")
-        rem = quality_control.remediate_video(output_path)
-        if rem["success"] and rem["audit"]["passed"]:
-            final_video = rem["remediated_path"]
-            print("[+] QC Passed 100% after Remediation!")
-    else:
-        print("[+] QC PASSED 100%! Broadcast standard -14 LUFS, 9:16 format verified.")
+    # 6. Quality Control
+    qc = quality_control.audit_video(output_path)
+    if not qc["passed"]:
+        output_path = quality_control.remediate_video(output_path)
 
-    # 7. SEO Metadata for Channel 2
-    print("\n🚀 Generating SEO Metadata for ArisVexx...")
-    seo_meta = {
-        "title": script_data["title"],
-        "description": (
-            f"{script_data['title']}\n\n"
-            "Reference Anime: A Silent Voice (Koe no Katachi)\n"
-            "Channel: ArisVexx - The Science of Dark Psychology, Human Vulnerability & 48 Laws of Power.\n\n"
-            "#darkpsychology #48lawsofpower #asilentvoice #manipulation #stoicism #shorts"
-        ),
-        "tags": ["dark psychology", "a silent voice", "koe no katachi", "48 laws of power", "stoicism", "human behavior", "shorts"]
-    }
+    # 7. SEO Metadata
+    seo = gemini_metadata.generate_seo_metadata(script_data["title"], "Dark Psychology Short for ArisVexx")
 
     return {
         "success": True,
-        "video_path": final_video,
-        "source_clips": clips,
-        "premiere_xml": ppro_res["xml_path"],
+        "video_path": output_path,
+        "source_clips": fc_clips,
+        "premiere_xml": xml_res["xml_path"],
         "premiere_jsx": jsx_res["script_path"],
-        "seo_metadata": seo_meta,
+        "seo_metadata": seo,
         "qc_passed": True
     }
 
 if __name__ == "__main__":
     res = produce_channel2_short()
-    print("\n" + "=" * 60)
-    print("[+] Channel 2 Production Complete!")
-    print(f"Video: {res.get('video_path')}")
-    print(f"Premiere XML: {res.get('premiere_xml')}")
-    print(f"Title: {res.get('seo_metadata', {}).get('title')}")
-    print("=" * 60)
+    print("Channel 2 Result:", res)

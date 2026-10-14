@@ -1,9 +1,3 @@
 {
-  "mcpServers": {
-    "after-effects": {
-      "command": "node",
-      "args": ["aftereffects-mcp/mcp/ae-mcp.js"],
-      "env": {}
-    }
-  }
+  "mcpServers": {}
 }

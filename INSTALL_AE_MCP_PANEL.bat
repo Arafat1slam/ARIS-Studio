@@ -11,8 +11,8 @@ for /L %%v in (9,1,18) do (
     reg add "HKCU\Software\Adobe\CSXS.%%v" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul 2>&1
 )
 
-echo [*] Linking com.aemcpbridge into Adobe CEP extensions directory...
-call aftereffects-mcp\install.cmd
+echo [*] Adobe CEP extension com.aemcpbridge is already installed in:
+echo     %APPDATA%\Adobe\CEP\extensions\com.aemcpbridge
 
 echo.
 echo =================================================================

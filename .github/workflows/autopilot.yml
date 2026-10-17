@@ -1,16 +1,17 @@
 name: ARIS 24/7 Cloud Auto-Pilot
 
+# on:
+#   schedule:
+#     # Channel 1: iταchι Live (Anime Viral Shorts) + Instagram Reels
+#     - cron: '32 7 * * *'    # 01:32 PM BST (07:32 UTC)
+#     - cron: '32 12 * * *'   # 06:32 PM BST (12:32 UTC)
+#     - cron: '32 15 * * *'   # 09:32 PM BST (15:32 UTC)
+#     # Channel 2: ArisVexx (Dark Psychology - USA High-CPM Peak)
+#     - cron: '03 16 * * *'   # 10:03 PM BST = 12:03 PM US EST Lunch (16:03 UTC)
+#     - cron: '33 19 * * *'   # 01:33 AM BST = 03:33 PM US EST Commute (19:33 UTC)
+#     - cron: '32 0 * * *'    # 06:32 AM BST = 08:32 PM US EST Bedtime (00:32 UTC)
+# 
 on:
-  schedule:
-    # Channel 1: iταchι Live (Anime Viral Shorts) + Instagram Reels
-    - cron: '32 7 * * *'    # 01:32 PM BST (07:32 UTC)
-    - cron: '32 12 * * *'   # 06:32 PM BST (12:32 UTC)
-    - cron: '32 15 * * *'   # 09:32 PM BST (15:32 UTC)
-    # Channel 2: ArisVexx (Dark Psychology - USA High-CPM Peak)
-    - cron: '03 16 * * *'   # 10:03 PM BST = 12:03 PM US EST Lunch (16:03 UTC)
-    - cron: '33 19 * * *'   # 01:33 AM BST = 03:33 PM US EST Commute (19:33 UTC)
-    - cron: '32 0 * * *'    # 06:32 AM BST = 08:32 PM US EST Bedtime (00:32 UTC)
-
   workflow_dispatch:
     inputs:
       target:
